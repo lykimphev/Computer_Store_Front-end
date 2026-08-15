@@ -212,12 +212,21 @@ export const AuthService = {
         data: user,
       };
     } catch (err: any) {
-      // Properly throw error - no fake session fallback
-      const message =
-        err?.response?.data?.message ||
-        err?.message ||
-        "Registration failed. Please try again.";
-      throw new Error(message);
+      // Extract meaningful error from backend response
+      const backendMsg = err?.response?.data?.message
+        || err?.response?.data?.errors?.email?.[0]
+        || err?.response?.data?.errors?.password?.[0];
+
+      if (backendMsg) {
+        throw new Error(backendMsg);
+      }
+
+      // Network error = server sleeping or unreachable
+      if (!err?.response) {
+        throw new Error("Cannot connect to server. Please wait 30 seconds and try again (server may be starting up).");
+      }
+
+      throw new Error("Registration failed. Please try again.");
     }
   },
 
