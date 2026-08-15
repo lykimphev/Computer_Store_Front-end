@@ -130,67 +130,43 @@ export const AuthService = {
     const emailVal = typeof payload === "string" ? payload : payload.email;
     const passVal = typeof payload === "string" ? passwordParam : payload.password;
 
-    try {
-      const response = await apiClient.post("/auth/login", {
-        email: emailVal,
-        password: passVal,
-      });
+    // Call backend API - no fallback, must be valid registered user
+    const response = await apiClient.post("/auth/login", {
+      email: emailVal,
+      password: passVal,
+    });
 
-      const resData = response.data?.data || response.data || response;
-      const rawUser = resData.user || resData;
-      const token = resData.token || rawUser.token;
+    const resData = response.data?.data || response.data || response;
+    const rawUser = resData.user || resData;
+    const token = resData.token || rawUser.token;
 
-      const user: User = {
-        id: rawUser.id || `user-${Date.now()}`,
-        fullName: rawUser.name || rawUser.fullName || emailVal.split("@")[0],
-        email: rawUser.email || emailVal,
-        role: rawUser.role,
-        role_id: rawUser.role_id,
-        token,
-      };
-
-      const savedAvatar = getStoredAvatar(user.email);
-      if (savedAvatar) {
-        user.avatar = savedAvatar;
-      }
-
-      if (token) {
-        safeSetLocalStorage(STORAGE_KEY_TOKEN, token);
-      }
-      AuthService.saveUser(user);
-
-      return {
-        success: true,
-        statuscode: 200,
-        message: "Login successful",
-        data: user,
-      };
-    } catch (err: any) {
-      console.warn("Backend login failed, using fallback:", err);
-      const user: User = {
-        id: `user-${Date.now()}`,
-        fullName: emailVal.split("@")[0],
-        email: emailVal,
-        token: `tok_dummy_${Date.now()}`,
-      };
-
-      const savedAvatar = getStoredAvatar(user.email);
-      if (savedAvatar) {
-        user.avatar = savedAvatar;
-      }
-
-      AuthService.saveUser(user);
-      if (user.token) {
-        safeSetLocalStorage(STORAGE_KEY_TOKEN, user.token);
-      }
-
-      return {
-        success: true,
-        statuscode: 200,
-        message: "Login successful",
-        data: user,
-      };
+    if (!token) {
+      throw new Error("Invalid email or password. Please register first.");
     }
+
+    const user: User = {
+      id: rawUser.id,
+      fullName: rawUser.name || rawUser.fullName || emailVal.split("@")[0],
+      email: rawUser.email || emailVal,
+      role: rawUser.role,
+      role_id: rawUser.role_id,
+      token,
+    };
+
+    const savedAvatar = getStoredAvatar(user.email);
+    if (savedAvatar) {
+      user.avatar = savedAvatar;
+    }
+
+    safeSetLocalStorage(STORAGE_KEY_TOKEN, token);
+    AuthService.saveUser(user);
+
+    return {
+      success: true,
+      statuscode: 200,
+      message: "Login successful",
+      data: user,
+    };
   },
 
   register: async (payload: AuthRegister | string, emailParam?: string, passwordParam?: string): Promise<ApiResponse<User>> => {
@@ -236,30 +212,12 @@ export const AuthService = {
         data: user,
       };
     } catch (err: any) {
-      console.warn("Backend registration error, using safe client session:", err);
-      const user: User = {
-        id: `user-${Date.now()}`,
-        fullName: nameVal,
-        email: emailVal,
-        token: `tok_dummy_${Date.now()}`,
-      };
-
-      const savedAvatar = getStoredAvatar(user.email);
-      if (savedAvatar) {
-        user.avatar = savedAvatar;
-      }
-
-      AuthService.saveUser(user);
-      if (user.token) {
-        safeSetLocalStorage(STORAGE_KEY_TOKEN, user.token);
-      }
-
-      return {
-        success: true,
-        statuscode: 200,
-        message: "Registration successful",
-        data: user,
-      };
+      // Properly throw error - no fake session fallback
+      const message =
+        err?.response?.data?.message ||
+        err?.message ||
+        "Registration failed. Please try again.";
+      throw new Error(message);
     }
   },
 
