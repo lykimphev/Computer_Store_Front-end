@@ -270,7 +270,7 @@ export const Hero: React.FC<HeroProps> = ({
 
                   <div className="col-lg-5 text-center">
                     <img
-                      src={slide.image.startsWith('http') ? slide.image : `http://localhost:8000${slide.image}`}
+                      src={slide.image.startsWith('http') ? slide.image : slide.image}
                       alt={slide.title}
                       className="img-fluid rounded-4"
                       style={{ maxHeight: '320px', objectFit: 'contain', width: '100%' }}
