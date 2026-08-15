@@ -11,13 +11,22 @@ const normalizeCategory = (slug: string): Product["category"] => {
 };
 
 /**
+ * Get backend base URL from environment
+ */
+const getBackendBaseUrl = (): string => {
+  const apiUrl = (import.meta as any).env?.VITE_API_URL || 'http://localhost:8000/api';
+  return apiUrl.replace(/\/api\/?$/, '');
+};
+
+/**
  * Ensures full HTTP URL for Laravel Backend static images
  */
 export const formatImageUrl = (img: string): string => {
   if (!img) return "/Image/Logo.png";
   if (img.startsWith("http://") || img.startsWith("https://")) return img;
   const cleanPath = img.startsWith("/") ? img : `/${img}`;
-  return `http://localhost:8000${cleanPath}`;
+  const backendBase = getBackendBaseUrl();
+  return `${backendBase}${cleanPath}`;
 };
 
 /**
