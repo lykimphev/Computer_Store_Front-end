@@ -9,7 +9,7 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
 
 const apiClient = axios.create({
   baseURL: API_URL,
-  timeout: 10000,
+  timeout: 30000,   // 30 seconds — allow Render free-tier DB warm-up time
   headers: {
     'Content-Type': 'application/json',
     Accept: 'application/json',
@@ -46,7 +46,8 @@ apiClient.interceptors.response.use(
       localStorage.removeItem('kp_computer_user_session');
     }
 
-    return Promise.reject(data?.message || error.message || 'Server error occurred');
+    // Re-throw the full error so callers can inspect error.response
+    return Promise.reject(error);
   }
 );
 
