@@ -81,12 +81,18 @@ export interface AuthRegister {
 export const AuthService = {
   getCurrentUser: (): User | null => {
     try {
+      const token = localStorage.getItem(STORAGE_KEY_TOKEN);
       const data = localStorage.getItem(STORAGE_KEY_USER);
-      if (!data) {
+
+      // Strictly require BOTH token and session data
+      if (!token || !data) {
+        localStorage.removeItem(STORAGE_KEY_USER);
         localStorage.removeItem(STORAGE_KEY_TOKEN);
         return null;
       }
+
       const user: User = JSON.parse(data);
+      user.token = token;
 
       // Re-attach persistent avatar if available
       if (user.email && !user.avatar) {
@@ -98,6 +104,8 @@ export const AuthService = {
 
       return user;
     } catch {
+      localStorage.removeItem(STORAGE_KEY_USER);
+      localStorage.removeItem(STORAGE_KEY_TOKEN);
       return null;
     }
   },
@@ -107,7 +115,7 @@ export const AuthService = {
   },
 
   isAuthenticated: (): boolean => {
-    return !!localStorage.getItem(STORAGE_KEY_USER);
+    return !!localStorage.getItem(STORAGE_KEY_TOKEN) && !!localStorage.getItem(STORAGE_KEY_USER);
   },
 
   saveUser: (user: User): void => {
