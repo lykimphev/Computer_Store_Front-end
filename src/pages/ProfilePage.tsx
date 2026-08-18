@@ -363,14 +363,14 @@ export const ProfilePage: React.FC = () => {
                   <PackageCheck size={56} color="#1877F2" className="mb-3 opacity-75" />
                   <h5 className="fw-bold text-dark mb-2">No Past Orders or Invoices Found</h5>
                   <p className="text-muted small mb-4" style={{ maxWidth: "400px", margin: "0 auto" }}>
-                    លោកអ្នកមិនទាន់មានប្រវត្តិទិញទំនិញនៅឡើយទេ។ សូមចុចបន្តទិញទំនិញ ដើម្បីទទួលបានកុំព្យូទ័រ និង វិក្កយបត្រថ្មី!
+                    You do not have any past orders or invoices yet. Explore our store to find the latest laptops and tech gear!
                   </p>
                   <button
                     onClick={() => navigate("/")}
                     className="btn btn-primary rounded-pill px-4 py-2 fw-bold text-white shadow-sm"
                     style={{ backgroundColor: "#1877F2" }}
                   >
-                    ចុចបន្តទិញទំនិញ (Explore Store) &rarr;
+                    Explore Store &rarr;
                   </button>
                 </div>
               ) : (
@@ -468,7 +468,7 @@ export const ProfilePage: React.FC = () => {
                               className="btn btn-primary rounded-pill px-4 py-2 fw-bold text-white d-flex align-items-center gap-2 shadow-sm"
                               style={{ backgroundColor: "#1877F2" }}
                             >
-                              <Printer size={16} /> មើលវិក្កយបត្រ (View Invoice) <ChevronRight size={16} />
+                              <Printer size={16} /> View Invoice <ChevronRight size={16} />
                             </button>
                           </div>
                         </div>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Laptop, Cpu, HardDrive, Wrench } from 'lucide-react';
+import { Laptop, Cpu, HardDrive } from 'lucide-react';
 
 interface HeroProps {
   activeTab: string;
@@ -135,7 +135,7 @@ export const Hero: React.FC<HeroProps> = ({
       <div className="border-bottom py-3">
         <div className="w-100 px-3 px-md-4">
           <div className="row text-center g-3">
-            <div className="col-3">
+            <div className="col-4">
               <button
                 type="button"
                 className={`btn w-100 category-tab-btn fw-bold d-flex align-items-center justify-content-center gap-2 ${
@@ -148,7 +148,7 @@ export const Hero: React.FC<HeroProps> = ({
                 LAPTOP
               </button>
             </div>
-            <div className="col-3">
+            <div className="col-4">
               <button
                 type="button"
                 className={`btn w-100 category-tab-btn fw-bold d-flex align-items-center justify-content-center gap-2 ${
@@ -161,7 +161,7 @@ export const Hero: React.FC<HeroProps> = ({
                 PC HARDWARE
               </button>
             </div>
-            <div className="col-3">
+            <div className="col-4">
               <button
                 type="button"
                 className={`btn w-100 category-tab-btn fw-bold d-flex align-items-center justify-content-center gap-2 ${
@@ -172,19 +172,6 @@ export const Hero: React.FC<HeroProps> = ({
               >
                 <HardDrive size={20} />
                 ACCESSORIES
-              </button>
-            </div>
-            <div className="col-3">
-              <button
-                type="button"
-                className={`btn w-100 category-tab-btn fw-bold d-flex align-items-center justify-content-center gap-2 ${
-                  activeTab === 'pc_builder' ? 'active' : 'text-dark'
-                }`}
-                onClick={() => onTabChange('pc_builder')}
-                style={{ fontSize: '16px', letterSpacing: '0.5px', cursor: 'pointer' }}
-              >
-                <Wrench size={20} />
-                PC BUILDER
               </button>
             </div>
           </div>

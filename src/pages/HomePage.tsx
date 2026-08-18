@@ -277,7 +277,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                           className="btn btn-sm btn-link text-decoration-none fw-bold"
                           onClick={() => handleBrandChange(series.key)}
                         >
-                          ចុចបន្តមើលទាំងអស់ ({seriesItems.length}) &rarr;
+                          View All ({seriesItems.length}) &rarr;
                         </button>
                       </div>
                       {renderProductGrid(seriesItems.slice(0, 3))}
@@ -318,7 +318,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                           className="btn btn-sm btn-link text-decoration-none fw-bold"
                           onClick={() => handleBrandChange(section.key)}
                         >
-                          ចុចបន្តមើលទាំងអស់ ({sectionItems.length}) &rarr;
+                          View All ({sectionItems.length}) &rarr;
                         </button>
                       </div>
                       {renderProductGrid(sectionItems.slice(0, 3))}
@@ -359,7 +359,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                           className="btn btn-sm btn-link text-decoration-none fw-bold"
                           onClick={() => handleBrandChange(section.key)}
                         >
-                          ចុចបន្តមើលទាំងអស់ ({sectionItems.length}) &rarr;
+                          View All ({sectionItems.length}) &rarr;
                         </button>
                       </div>
                       {renderProductGrid(sectionItems.slice(0, 3))}
@@ -400,7 +400,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                           className="btn btn-sm btn-link text-decoration-none fw-bold"
                           onClick={() => handleBrandChange(section.key)}
                         >
-                          ចុចបន្តមើលទាំងអស់ ({sectionItems.length}) &rarr;
+                          View All ({sectionItems.length}) &rarr;
                         </button>
                       </div>
                       {renderProductGrid(sectionItems)}

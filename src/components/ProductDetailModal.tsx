@@ -360,7 +360,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
                     style={{ backgroundColor: '#1877F2', borderColor: '#1877F2' }}
                     onClick={handleBuy}
                   >
-                    ចុចបន្តទិញភ្លាមៗ (Buy Now)
+                    Buy Now
                   </button>
                 </div>
               </div>

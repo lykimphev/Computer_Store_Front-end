@@ -57,14 +57,14 @@ export const CartView: React.FC<CartViewProps> = ({
                 No items in your cart
               </h3>
               <p className="text-muted mb-4" style={{ maxWidth: "420px" }}>
-                កន្ត្រកទំនិញរបស់អ្នកមិនទាន់មានទំនិញនៅឡើយទេ។ សូមចុចបន្តទិញទំនិញ ដើម្បីស្វែងរកកុំព្យូទ័រ និង គ្រឿងបន្លាស់ល្អៗ!
+                Your shopping cart is currently empty. Explore our store for the latest laptops, PC hardware, and accessories!
               </p>
               <button
                 className="btn btn-primary rounded-pill px-4 py-2.5 fs-6 fw-bold shadow-sm d-inline-flex align-items-center gap-2"
                 style={{ backgroundColor: "#1877F2" }}
                 onClick={onBack}
               >
-                ចុចបន្តទិញទំនិញ (Continue Shopping) <ArrowRight size={18} />
+                Continue Shopping <ArrowRight size={18} />
               </button>
             </div>
           ) : (
@@ -129,7 +129,7 @@ export const CartView: React.FC<CartViewProps> = ({
         <div className="container-fluid px-4 px-lg-5">
           <div className="border rounded-4 p-3 ps-4 d-flex align-items-center justify-content-between flex-wrap gap-3 bg-white shadow-sm">
             <div className="fs-3 fw-bold text-primary" style={{ color: "#1877F2" }}>
-              Total: {currency === "KHR" ? `៛ ${(totalUSD * 4000).toLocaleString()}` : `$ ${totalUSD.toFixed(2)}`}
+              Total: {currency === "KHR" ? `KHR ${(totalUSD * 4000).toLocaleString()}` : `$ ${totalUSD.toFixed(2)}`}
             </div>
 
             <div className="d-flex align-items-center gap-3">
@@ -137,7 +137,7 @@ export const CartView: React.FC<CartViewProps> = ({
                 className="btn btn-outline-secondary rounded-pill px-4 py-2.5 fw-bold d-inline-flex align-items-center gap-2"
                 onClick={onBack}
               >
-                <ArrowLeft size={18} /> ចុចបន្តទិញបន្ថែម (Continue Shopping)
+                <ArrowLeft size={18} /> Continue Shopping
               </button>
 
               <button
@@ -146,7 +146,7 @@ export const CartView: React.FC<CartViewProps> = ({
                 disabled={isEmpty}
                 onClick={onProceedOrder}
               >
-                ចុចបន្តកុម្ម៉ង់ (Order) <ArrowRight size={20} />
+                Proceed to Checkout <ArrowRight size={20} />
               </button>
             </div>
           </div>

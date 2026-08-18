@@ -56,7 +56,7 @@ export const Footer: React.FC = () => {
           <div className="col-12 col-md-3">
             <h6 className="fw-bold text-dark mb-3 fs-6">Address</h6>
             <p className="text-muted small mb-4" style={{ lineHeight: '1.6' }}>
-              អាសយដ្ឋានហាង ៖ ផ្ទះលេខ 524E0 , មហាវិថី កម្ពុជាក្រោម (128), ភ្នំពេញ
+              #524E0, Kampuchea Krom Blvd (128), Phnom Penh, Cambodia
             </p>
 
             <h6 className="fw-bold text-dark mb-2 fs-6">Email</h6>

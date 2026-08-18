@@ -68,14 +68,14 @@ export const OrderSuccessPage: React.FC = () => {
                 className="btn btn-primary px-4 py-2.5 rounded-pill fw-bold shadow-sm d-flex align-items-center justify-content-center gap-2"
                 style={{ backgroundColor: '#1877F2' }}
               >
-                <Home size={18} /> ចុចបន្តទិញទំនិញបន្ថែម (Continue Shopping)
+                <Home size={18} /> Continue Shopping
               </button>
 
               <button
                 onClick={() => navigate('/profile?tab=invoices')}
                 className="btn btn-outline-secondary px-4 py-2.5 rounded-pill fw-bold d-flex align-items-center justify-content-center gap-2"
               >
-                <Package size={18} /> មើលវិក្កយបត្រ & ការកុម្ម៉ង់ (View Invoices) <ArrowRight size={16} />
+                <Package size={18} /> View Invoices & Orders <ArrowRight size={16} />
               </button>
             </div>
 

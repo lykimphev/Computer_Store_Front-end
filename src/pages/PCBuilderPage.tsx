@@ -234,14 +234,14 @@ export const PCBuilderPage: React.FC = () => {
                   className="btn btn-primary btn-lg w-100 rounded-pill fw-bold text-white shadow-sm d-flex align-items-center justify-content-center gap-2"
                   style={{ backgroundColor: "#1877F2", borderColor: "#1877F2" }}
                 >
-                  <ShoppingCart size={20} /> ចុចបន្តទៅកន្ត្រក (Add Build & Proceed)
+                  <ShoppingCart size={20} /> Add Build to Cart & Proceed
                 </button>
 
                 <button
                   onClick={() => navigate('/')}
                   className="btn btn-outline-secondary w-100 rounded-pill fw-semibold"
                 >
-                  ចុចបន្តទិញទំនិញផ្សេងទៀត (Continue Shopping)
+                  Continue Shopping
                 </button>
               </div>
             </div>
