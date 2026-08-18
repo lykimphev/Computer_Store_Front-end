@@ -157,31 +157,33 @@ export const PCBuilderPage: React.FC = () => {
               const selectedItem = selected[slot.key];
 
               return (
-                <div key={slot.key} className="card border rounded-4 shadow-sm mb-3 p-3 bg-white">
+                <div key={slot.key} className="card border rounded-4 shadow-xs mb-3 p-3 bg-white transition-all">
                   <div className="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
                     <div className="d-flex align-items-center gap-2">
                       {slot.icon}
-                      <h5 className="fw-bold m-0 text-dark">{slot.title}</h5>
+                      <span className="fw-bold text-dark" style={{ fontSize: "15px" }}>{slot.title}</span>
                     </div>
                     {selectedItem && (
                       <button
-                        className="btn btn-sm btn-outline-danger rounded-pill px-3"
+                        className="btn btn-sm btn-outline-danger rounded-pill px-3 py-0.5"
+                        style={{ fontSize: "12px" }}
                         onClick={() => handleSelectComponent(slot.key, null)}
                       >
-                        Remove Selection
+                        Remove
                       </button>
                     )}
                   </div>
 
                   <select
-                    className="form-select form-select-lg rounded-3 fw-semibold border-secondary-subtle"
+                    className="form-select py-2 rounded-3 fw-medium text-dark border-secondary-subtle"
+                    style={{ fontSize: "14px" }}
                     value={selectedItem ? selectedItem.id : ""}
                     onChange={(e) => {
                       const found = availableItems.find((p) => p.id === e.target.value);
                       handleSelectComponent(slot.key, found || null);
                     }}
                   >
-                    <option value="">-- Choose {slot.title} --</option>
+                    <option value="">Choose {slot.title}</option>
                     {availableItems.map((prod) => (
                       <option key={prod.id} value={prod.id}>
                         {prod.name} (${Number(prod.price).toFixed(2)})
@@ -190,11 +192,11 @@ export const PCBuilderPage: React.FC = () => {
                   </select>
 
                   {selectedItem && (
-                    <div className="d-flex align-items-center gap-3 mt-3 p-2 bg-light rounded-3">
-                      <img src={selectedItem.image} alt={selectedItem.name} style={{ width: "48px", height: "48px", objectFit: "contain" }} />
-                      <div>
-                        <div className="fw-bold text-dark small">{selectedItem.name}</div>
-                        <div className="text-primary fw-bold">${Number(selectedItem.price).toFixed(2)}</div>
+                    <div className="d-flex align-items-center gap-3 mt-2 p-2 bg-light rounded-3 border">
+                      <img src={selectedItem.image} alt={selectedItem.name} style={{ width: "42px", height: "42px", objectFit: "contain" }} />
+                      <div className="flex-grow-1">
+                        <div className="fw-semibold text-dark" style={{ fontSize: "13px" }}>{selectedItem.name}</div>
+                        <div className="text-primary fw-bold" style={{ fontSize: "13px" }}>${Number(selectedItem.price).toFixed(2)}</div>
                       </div>
                     </div>
                   )}
@@ -205,25 +207,27 @@ export const PCBuilderPage: React.FC = () => {
 
           {/* Right Column: Build Summary Card */}
           <div className="col-12 col-lg-4">
-            <div className="card border rounded-4 shadow-sm p-4 bg-white sticky-top" style={{ top: "90px" }}>
-              <h4 className="fw-bold text-dark mb-3">Custom Build Summary</h4>
-              <hr />
+            <div className="card border rounded-4 shadow-sm p-3 p-md-4 bg-white sticky-top" style={{ top: "90px" }}>
+              <h5 className="fw-bold text-dark mb-3">Custom Build Summary</h5>
+              <hr className="my-2 text-muted" />
 
-              <div className="vstack gap-2 mb-4">
+              <div className="vstack gap-2 mb-3 mt-3">
                 {slots.map((slot) => {
                   const item = selected[slot.key];
                   return (
-                    <div key={slot.key} className="d-flex justify-content-between small">
-                      <span className="text-muted">{slot.title}:</span>
-                      <span className="fw-bold text-end ms-2">{item ? `$${Number(item.price).toFixed(2)}` : "Not selected"}</span>
+                    <div key={slot.key} className="d-flex justify-content-between align-items-center py-1 border-bottom border-light" style={{ fontSize: "13.5px" }}>
+                      <span className="text-muted">{slot.title}</span>
+                      <span className={`fw-semibold text-end ms-2 ${item ? 'text-dark' : 'text-muted opacity-75'}`}>
+                        {item ? `$${Number(item.price).toFixed(2)}` : "Not selected"}
+                      </span>
                     </div>
                   );
                 })}
               </div>
 
-              <div className="border-top pt-3 mb-4 d-flex justify-content-between align-items-center">
-                <span className="fs-5 fw-bold">Total Price:</span>
-                <span className="fs-3 fw-extrabold text-primary" style={{ color: "#1877F2" }}>
+              <div className="border-top pt-3 mb-3 d-flex justify-content-between align-items-center">
+                <span className="fs-6 fw-bold text-dark">Total Price:</span>
+                <span className="fs-4 fw-extrabold text-primary" style={{ color: "#1877F2" }}>
                   ${calculateTotal().toFixed(2)}
                 </span>
               </div>
@@ -231,15 +235,16 @@ export const PCBuilderPage: React.FC = () => {
               <div className="d-flex flex-column gap-2">
                 <button
                   onClick={handleAddBuildToCart}
-                  className="btn btn-primary btn-lg w-100 rounded-pill fw-bold text-white shadow-sm d-flex align-items-center justify-content-center gap-2"
-                  style={{ backgroundColor: "#1877F2", borderColor: "#1877F2" }}
+                  className="btn btn-primary py-2.5 w-100 rounded-pill fw-bold text-white shadow-sm d-flex align-items-center justify-content-center gap-2"
+                  style={{ backgroundColor: "#1877F2", borderColor: "#1877F2", fontSize: "15px" }}
                 >
-                  <ShoppingCart size={20} /> Add Build to Cart & Proceed
+                  <ShoppingCart size={18} /> Add Build to Cart & Proceed
                 </button>
 
                 <button
                   onClick={() => navigate('/')}
-                  className="btn btn-outline-secondary w-100 rounded-pill fw-semibold"
+                  className="btn btn-outline-secondary py-2 w-100 rounded-pill fw-semibold"
+                  style={{ fontSize: "14px" }}
                 >
                   Continue Shopping
                 </button>
