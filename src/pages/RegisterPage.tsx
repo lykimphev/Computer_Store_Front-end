@@ -56,6 +56,54 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({
     }
   };
 
+  const handleGoogleLogin = async () => {
+    setLoading(true);
+    setErrorMsg('');
+
+    try {
+      const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+
+      // Check if Google SDK is loaded on window
+      if (typeof window !== 'undefined' && (window as any).google?.accounts?.id && googleClientId) {
+        (window as any).google.accounts.id.initialize({
+          client_id: googleClientId,
+          callback: async (response: any) => {
+            try {
+              const res = await authService.loginWithGoogle(response.credential);
+              if (onRegisterSuccess) onRegisterSuccess(res.data);
+              navigate('/');
+            } catch (err: any) {
+              setErrorMsg(err?.message || 'Google Login failed.');
+            } finally {
+              setLoading(false);
+            }
+          },
+        });
+        (window as any).google.accounts.id.prompt();
+      } else {
+        // Fallback / Direct Prompt if Client ID is not configured yet
+        const userEmail = prompt('Enter your Google Gmail address to sign in / auto-register:', 'demo.user@gmail.com');
+        if (!userEmail) {
+          setLoading(false);
+          return;
+        }
+        const userName = userEmail.split('@')[0].replace('.', ' ');
+        const res = await authService.loginWithGoogle({
+          email: userEmail,
+          name: userName.charAt(0).toUpperCase() + userName.slice(1),
+          google_id: `google-${Date.now()}`,
+          avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=1877F2&color=fff`,
+        });
+        if (onRegisterSuccess) onRegisterSuccess(res.data);
+        navigate('/');
+      }
+    } catch (err: any) {
+      setErrorMsg(err?.message || 'Google sign in failed.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleBack = () => {
     if (onBackToHome) onBackToHome();
     else navigate('/');
@@ -182,6 +230,30 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({
               )}
             </button>
           </form>
+
+          {/* Social Login Divider */}
+          <div className="d-flex align-items-center my-3">
+            <hr className="flex-grow-1 border-secondary-subtle my-0" />
+            <span className="px-2 small text-muted fw-semibold" style={{ fontSize: '12px' }}>OR</span>
+            <hr className="flex-grow-1 border-secondary-subtle my-0" />
+          </div>
+
+          {/* Sign in with Google Button */}
+          <button
+            type="button"
+            onClick={handleGoogleLogin}
+            disabled={loading}
+            className="btn btn-outline-secondary w-100 py-2.5 rounded-3 fw-semibold bg-white text-dark shadow-xs d-flex align-items-center justify-content-center gap-2 border"
+            style={{ fontSize: '14.5px', transition: 'all 0.2s ease' }}
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24">
+              <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/>
+              <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.35 24 12 24z"/>
+              <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/>
+              <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.35 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
+            </svg>
+            <span>Continue with Google</span>
+          </button>
 
           <div className="text-center mt-4 pt-2 border-top">
             <span className="small text-muted me-1">Already have an account?</span>

@@ -177,6 +177,43 @@ export const AuthService = {
     };
   },
 
+  loginWithGoogle: async (credentialOrData: string | { email: string; name?: string; google_id?: string; avatar?: string }): Promise<ApiResponse<User>> => {
+    const payload = typeof credentialOrData === "string" ? { credential: credentialOrData } : credentialOrData;
+
+    const response = await apiClient.post("/auth/google", payload);
+    const resData = response.data?.data || response.data || response;
+    const rawUser = resData.user || resData;
+    const token = resData.token || rawUser.token;
+
+    if (!token) {
+      throw new Error("Failed to authenticate with Google.");
+    }
+
+    const user: User = {
+      id: rawUser.id,
+      fullName: rawUser.name || rawUser.fullName || rawUser.email?.split("@")[0] || "Google User",
+      email: rawUser.email,
+      role: rawUser.role,
+      role_id: rawUser.role_id,
+      token,
+      avatar: (typeof credentialOrData !== "string" ? credentialOrData.avatar : null) || rawUser.avatar,
+    };
+
+    if (user.avatar && user.email) {
+      setStoredAvatar(user.email, user.avatar);
+    }
+
+    safeSetLocalStorage(STORAGE_KEY_TOKEN, token);
+    AuthService.saveUser(user);
+
+    return {
+      success: true,
+      statuscode: 200,
+      message: "Google Login successful",
+      data: user,
+    };
+  },
+
   register: async (payload: AuthRegister | string, emailParam?: string, passwordParam?: string): Promise<ApiResponse<User>> => {
     const nameVal = typeof payload === "string" ? payload : payload.fullName;
     const emailVal = typeof payload === "string" ? emailParam || "" : payload.email;
