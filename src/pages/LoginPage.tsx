@@ -52,11 +52,52 @@ export const LoginPage: React.FC<LoginPageProps> = ({
     setLoading(true);
     setErrorMsg('');
 
-    try {
-      const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+    const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || '819190143418-qggekoatbll1ehtuv9ums8vn7mb90414.apps.googleusercontent.com';
 
-      // Check if Google SDK is loaded on window
-      if (typeof window !== 'undefined' && (window as any).google?.accounts?.id && googleClientId) {
+    try {
+      // 1. Primary: Use Google Identity Services Token Client (Pops up Google Account Chooser)
+      if (typeof window !== 'undefined' && (window as any).google?.accounts?.oauth2) {
+        const client = (window as any).google.accounts.oauth2.initTokenClient({
+          client_id: googleClientId,
+          scope: 'email profile openid',
+          callback: async (tokenResponse: any) => {
+            if (tokenResponse?.error) {
+              setErrorMsg('Google login was cancelled or failed.');
+              setLoading(false);
+              return;
+            }
+
+            try {
+              // Fetch user profile from Google UserInfo endpoint
+              const userInfoRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+                headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
+              });
+              const googleUser = await userInfoRes.json();
+
+              if (!googleUser.email) {
+                throw new Error('Unable to retrieve email from Google.');
+              }
+
+              // Send verified profile to Laravel Backend
+              const res = await authService.loginWithGoogle({
+                email: googleUser.email,
+                name: googleUser.name,
+                google_id: googleUser.sub,
+                avatar: googleUser.picture,
+              });
+
+              if (onLoginSuccess) onLoginSuccess(res.data);
+              navigate('/');
+            } catch (err: any) {
+              setErrorMsg(err?.message || 'Failed to authenticate with backend.');
+            } finally {
+              setLoading(false);
+            }
+          },
+        });
+        client.requestAccessToken();
+      } else if (typeof window !== 'undefined' && (window as any).google?.accounts?.id) {
+        // 2. Secondary fallback: One-Tap / ID Token
         (window as any).google.accounts.id.initialize({
           client_id: googleClientId,
           callback: async (response: any) => {
@@ -73,25 +114,11 @@ export const LoginPage: React.FC<LoginPageProps> = ({
         });
         (window as any).google.accounts.id.prompt();
       } else {
-        // Fallback / Direct Prompt if Client ID is not configured yet
-        const userEmail = prompt('Enter your Google Gmail address to sign in / auto-register:', 'demo.user@gmail.com');
-        if (!userEmail) {
-          setLoading(false);
-          return;
-        }
-        const userName = userEmail.split('@')[0].replace('.', ' ');
-        const res = await authService.loginWithGoogle({
-          email: userEmail,
-          name: userName.charAt(0).toUpperCase() + userName.slice(1),
-          google_id: `google-${Date.now()}`,
-          avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=1877F2&color=fff`,
-        });
-        if (onLoginSuccess) onLoginSuccess(res.data);
-        navigate('/');
+        setErrorMsg('Google Services are loading. Please try clicking again in a moment.');
+        setLoading(false);
       }
     } catch (err: any) {
       setErrorMsg(err?.message || 'Google sign in failed.');
-    } finally {
       setLoading(false);
     }
   };
