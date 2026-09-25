@@ -86,18 +86,20 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({
                 throw new Error('Unable to retrieve email from Google.');
               }
 
-              // Send verified profile to Laravel Backend
+              // Send verified profile to Laravel Backend with 'register' mode
               const res = await authService.loginWithGoogle({
                 email: googleUser.email,
                 name: googleUser.name,
                 google_id: googleUser.sub,
                 avatar: googleUser.picture,
-              });
+                mode: 'register',
+              }, 'register');
 
               if (onRegisterSuccess) onRegisterSuccess(res.data);
               navigate('/');
             } catch (err: any) {
-              setErrorMsg(err?.message || 'Failed to authenticate with backend.');
+              const msg = err?.response?.data?.message || err?.message || 'Failed to authenticate with backend.';
+              setErrorMsg(msg);
             } finally {
               setLoading(false);
             }
@@ -110,11 +112,12 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({
           client_id: googleClientId,
           callback: async (response: any) => {
             try {
-              const res = await authService.loginWithGoogle(response.credential);
+              const res = await authService.loginWithGoogle(response.credential, 'register');
               if (onRegisterSuccess) onRegisterSuccess(res.data);
               navigate('/');
             } catch (err: any) {
-              setErrorMsg(err?.message || 'Google Login failed.');
+              const msg = err?.response?.data?.message || err?.message || 'Google Registration failed.';
+              setErrorMsg(msg);
             } finally {
               setLoading(false);
             }
@@ -126,7 +129,8 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({
         setLoading(false);
       }
     } catch (err: any) {
-      setErrorMsg(err?.message || 'Google sign in failed.');
+      const msg = err?.response?.data?.message || err?.message || 'Google sign in failed.';
+      setErrorMsg(msg);
       setLoading(false);
     }
   };

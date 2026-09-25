@@ -78,18 +78,20 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                 throw new Error('Unable to retrieve email from Google.');
               }
 
-              // Send verified profile to Laravel Backend
+              // Send verified profile to Laravel Backend with strict 'login' mode
               const res = await authService.loginWithGoogle({
                 email: googleUser.email,
                 name: googleUser.name,
                 google_id: googleUser.sub,
                 avatar: googleUser.picture,
-              });
+                mode: 'login',
+              }, 'login');
 
               if (onLoginSuccess) onLoginSuccess(res.data);
               navigate('/');
             } catch (err: any) {
-              setErrorMsg(err?.message || 'Failed to authenticate with backend.');
+              const msg = err?.response?.data?.message || err?.message || 'Failed to authenticate with backend.';
+              setErrorMsg(msg);
             } finally {
               setLoading(false);
             }
@@ -102,11 +104,12 @@ export const LoginPage: React.FC<LoginPageProps> = ({
           client_id: googleClientId,
           callback: async (response: any) => {
             try {
-              const res = await authService.loginWithGoogle(response.credential);
+              const res = await authService.loginWithGoogle(response.credential, 'login');
               if (onLoginSuccess) onLoginSuccess(res.data);
               navigate('/');
             } catch (err: any) {
-              setErrorMsg(err?.message || 'Google Login failed.');
+              const msg = err?.response?.data?.message || err?.message || 'Google Login failed.';
+              setErrorMsg(msg);
             } finally {
               setLoading(false);
             }
@@ -118,7 +121,8 @@ export const LoginPage: React.FC<LoginPageProps> = ({
         setLoading(false);
       }
     } catch (err: any) {
-      setErrorMsg(err?.message || 'Google sign in failed.');
+      const msg = err?.response?.data?.message || err?.message || 'Google sign in failed.';
+      setErrorMsg(msg);
       setLoading(false);
     }
   };
@@ -155,7 +159,21 @@ export const LoginPage: React.FC<LoginPageProps> = ({
 
         {/* Card Body */}
         <div className="card-body p-4">
-          {errorMsg && <div className="alert alert-danger py-2 small rounded-3 mb-3">{errorMsg}</div>}
+          {errorMsg && (
+            <div className="alert alert-danger py-2 px-3 small rounded-3 mb-3">
+              <div>{errorMsg}</div>
+              {errorMsg.toLowerCase().includes('register') && (
+                <button
+                  type="button"
+                  onClick={handleGoRegister}
+                  className="btn btn-sm btn-outline-danger mt-2 fw-bold text-decoration-none w-100"
+                  style={{ fontSize: '13px' }}
+                >
+                  Create an account now &rarr;
+                </button>
+              )}
+            </div>
+          )}
 
           <form onSubmit={handleLoginSubmit}>
             <div className="mb-3">

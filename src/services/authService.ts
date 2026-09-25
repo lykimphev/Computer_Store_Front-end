@@ -177,8 +177,13 @@ export const AuthService = {
     };
   },
 
-  loginWithGoogle: async (credentialOrData: string | { email: string; name?: string; google_id?: string; avatar?: string }): Promise<ApiResponse<User>> => {
-    const payload = typeof credentialOrData === "string" ? { credential: credentialOrData } : credentialOrData;
+  loginWithGoogle: async (
+    credentialOrData: string | { email?: string; name?: string; google_id?: string; avatar?: string; mode?: 'login' | 'register' },
+    mode: 'login' | 'register' = 'login'
+  ): Promise<ApiResponse<User>> => {
+    const payload = typeof credentialOrData === "string"
+      ? { credential: credentialOrData, mode }
+      : { ...credentialOrData, mode: credentialOrData.mode || mode };
 
     const response = await apiClient.post("/auth/google", payload);
     const resData = response.data?.data || response.data || response;
@@ -186,7 +191,7 @@ export const AuthService = {
     const token = resData.token || rawUser.token;
 
     if (!token) {
-      throw new Error("Failed to authenticate with Google.");
+      throw new Error(response.data?.message || "Failed to authenticate with Google.");
     }
 
     const user: User = {
@@ -209,7 +214,7 @@ export const AuthService = {
     return {
       success: true,
       statuscode: 200,
-      message: "Google Login successful",
+      message: resData.message || "Google Login successful",
       data: user,
     };
   },
