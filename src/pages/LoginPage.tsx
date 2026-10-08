@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Mail, Lock, LogIn, ArrowLeft, Eye, EyeOff } from 'lucide-react';
+import { Mail, Lock, LogIn, ArrowLeft, Eye, EyeOff, Clock, ShieldAlert } from 'lucide-react';
 import type { User } from '../model';
 import { authService } from '../services/authService';
 
@@ -10,8 +10,11 @@ interface LoginPageProps {
   onBackToHome?: () => void;
 }
 
+const STORAGE_KEY_LOCKOUT = 'kp_login_lockout_until';
+const STORAGE_KEY_ATTEMPTS = 'kp_login_failed_attempts';
+
 /**
- * LOGIN PAGE COMPONENT (With Eye Password Toggle)
+ * LOGIN PAGE COMPONENT (With Eye Password Toggle & 5-Attempt Rate Limiting)
  */
 export const LoginPage: React.FC<LoginPageProps> = ({
   onLoginSuccess,
@@ -25,9 +28,60 @@ export const LoginPage: React.FC<LoginPageProps> = ({
   const [rememberMe, setRememberMe] = useState<boolean>(true);
   const [loading, setLoading] = useState<boolean>(false);
   const [errorMsg, setErrorMsg] = useState<string>('');
+  const [failedAttempts, setFailedAttempts] = useState<number>(0);
+  const [lockoutSeconds, setLockoutSeconds] = useState<number>(0);
+
+  // Initialize lockout and attempts from storage on mount
+  useEffect(() => {
+    try {
+      const storedLockout = localStorage.getItem(STORAGE_KEY_LOCKOUT);
+      if (storedLockout) {
+        const remaining = Math.ceil((parseInt(storedLockout, 10) - Date.now()) / 1000);
+        if (remaining > 0) {
+          setLockoutSeconds(remaining);
+          setFailedAttempts(5);
+        } else {
+          localStorage.removeItem(STORAGE_KEY_LOCKOUT);
+          localStorage.removeItem(STORAGE_KEY_ATTEMPTS);
+        }
+      } else {
+        const storedAttempts = localStorage.getItem(STORAGE_KEY_ATTEMPTS);
+        if (storedAttempts) {
+          setFailedAttempts(parseInt(storedAttempts, 10) || 0);
+        }
+      }
+    } catch {}
+  }, []);
+
+  // Countdown timer for lockout
+  useEffect(() => {
+    if (lockoutSeconds <= 0) return;
+
+    const timer = setInterval(() => {
+      setLockoutSeconds((prev) => {
+        if (prev <= 1) {
+          localStorage.removeItem(STORAGE_KEY_LOCKOUT);
+          localStorage.removeItem(STORAGE_KEY_ATTEMPTS);
+          setFailedAttempts(0);
+          setErrorMsg('');
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [lockoutSeconds]);
 
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (lockoutSeconds > 0) {
+      const m = Math.floor(lockoutSeconds / 60);
+      const s = lockoutSeconds % 60;
+      setErrorMsg(`Too many failed attempts. Please wait ${m}m ${s < 10 ? '0' : ''}${s}s before trying again.`);
+      return;
+    }
+
     if (!email || !password) {
       setErrorMsg('Please fill in both email and password.');
       return;
@@ -39,10 +93,31 @@ export const LoginPage: React.FC<LoginPageProps> = ({
     try {
       const res = await authService.login(email, password);
       const user = res.data;
+
+      // Successful login: reset attempts and lockouts
+      localStorage.removeItem(STORAGE_KEY_LOCKOUT);
+      localStorage.removeItem(STORAGE_KEY_ATTEMPTS);
+      setFailedAttempts(0);
+      setLockoutSeconds(0);
+
       if (onLoginSuccess) onLoginSuccess(user);
       navigate('/');
-    } catch {
-      setErrorMsg('Invalid email or password.');
+    } catch (err: any) {
+      const backendData = err?.response?.data;
+      const newAttempts = failedAttempts + 1;
+      setFailedAttempts(newAttempts);
+      localStorage.setItem(STORAGE_KEY_ATTEMPTS, String(newAttempts));
+
+      if (backendData?.locked || backendData?.retry_after > 0 || newAttempts >= 5) {
+        const waitTime = backendData?.retry_after || 180; // 3 minutes = 180 seconds
+        const lockoutUntil = Date.now() + waitTime * 1000;
+        localStorage.setItem(STORAGE_KEY_LOCKOUT, String(lockoutUntil));
+        setLockoutSeconds(waitTime);
+        setErrorMsg('Too many failed login attempts. Account temporarily locked for 3 minutes.');
+      } else {
+        const attemptsLeft = 5 - newAttempts;
+        setErrorMsg(`Invalid email or password. (${attemptsLeft} attempt${attemptsLeft > 1 ? 's' : ''} remaining)`);
+      }
     } finally {
       setLoading(false);
     }
@@ -222,19 +297,49 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                   id="rememberCheck"
                   checked={rememberMe}
                   onChange={(e) => setRememberMe(e.target.checked)}
+                  disabled={lockoutSeconds > 0}
                 />
                 <label className="form-check-label small text-secondary" htmlFor="rememberCheck">Remember me</label>
               </div>
+
+              {/* Right Side: Attempts Counter & Lockout Timer */}
+              {lockoutSeconds > 0 ? (
+                <div
+                  className="d-flex align-items-center gap-1 text-danger fw-semibold bg-danger-subtle px-2 py-0.5 rounded-2 border border-danger-subtle"
+                  style={{ fontSize: '11.5px' }}
+                  title="Account temporarily locked out"
+                >
+                  <Clock size={13} className="text-danger" />
+                  <span>Locked: {Math.floor(lockoutSeconds / 60)}:{String(lockoutSeconds % 60).padStart(2, '0')}</span>
+                </div>
+              ) : failedAttempts > 0 ? (
+                <div
+                  className="d-flex align-items-center gap-1 bg-warning-subtle text-warning-emphasis px-2 py-0.5 rounded-2 border border-warning-subtle fw-semibold"
+                  style={{ fontSize: '11.5px' }}
+                  title="Failed login attempts"
+                >
+                  <ShieldAlert size={13} className="text-warning" />
+                  <span>Attempts: <strong className="text-danger">{failedAttempts}/5</strong></span>
+                </div>
+              ) : null}
             </div>
 
             <button
               type="submit"
               className="btn btn-primary w-100 py-2.5 rounded-3 fw-bold shadow-sm d-flex align-items-center justify-content-center gap-2"
-              style={{ backgroundColor: '#1877F2' }}
-              disabled={loading}
+              style={{
+                backgroundColor: lockoutSeconds > 0 ? '#dc3545' : '#1877F2',
+                borderColor: lockoutSeconds > 0 ? '#dc3545' : '#1877F2',
+                cursor: lockoutSeconds > 0 ? 'not-allowed' : 'pointer',
+              }}
+              disabled={loading || lockoutSeconds > 0}
             >
               {loading ? (
                 <span>Logging in...</span>
+              ) : lockoutSeconds > 0 ? (
+                <>
+                  <Clock size={18} /> Locked ({Math.floor(lockoutSeconds / 60)}:{String(lockoutSeconds % 60).padStart(2, '0')})
+                </>
               ) : (
                 <>
                   <LogIn size={18} /> Log In
