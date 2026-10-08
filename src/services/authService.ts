@@ -158,6 +158,7 @@ export const AuthService = {
       email: rawUser.email || emailVal,
       role: rawUser.role,
       role_id: rawUser.role_id,
+      email_verified_at: rawUser.email_verified_at || null,
       token,
     };
 
@@ -200,6 +201,7 @@ export const AuthService = {
       email: rawUser.email,
       role: rawUser.role,
       role_id: rawUser.role_id,
+      email_verified_at: rawUser.email_verified_at || new Date().toISOString(),
       token,
       avatar: (typeof credentialOrData !== "string" ? credentialOrData.avatar : null) || rawUser.avatar,
     };
@@ -242,6 +244,7 @@ export const AuthService = {
         email: rawUser.email || emailVal,
         role: rawUser.role,
         role_id: rawUser.role_id,
+        email_verified_at: rawUser.email_verified_at || null,
         token,
       };
 
@@ -278,6 +281,45 @@ export const AuthService = {
 
       throw new Error("Registration failed. Please try again.");
     }
+  },
+
+  sendVerificationOtp: async (): Promise<{ success: boolean; message: string; expires_in?: number; preview_code?: string; already_verified?: boolean }> => {
+    const response = await apiClient.post("/auth/send-verification-otp");
+    return response.data;
+  },
+
+  verifyOtp: async (otp: string): Promise<ApiResponse<User>> => {
+    const response = await apiClient.post("/auth/verify-otp", { otp });
+    const resData = response.data?.data || response.data || response;
+    const rawUser = resData.user || resData;
+
+    const current = AuthService.getCurrentUser();
+    if (current) {
+      current.email_verified_at = rawUser.email_verified_at || new Date().toISOString();
+      AuthService.saveUser(current);
+    }
+
+    return {
+      success: true,
+      statuscode: 200,
+      message: response.data?.message || "Email verified successfully",
+      data: current || rawUser,
+    };
+  },
+
+  verifyEmailDirect: async (): Promise<ApiResponse<User>> => {
+    const response = await apiClient.post("/auth/verify-email");
+    const current = AuthService.getCurrentUser();
+    if (current) {
+      current.email_verified_at = new Date().toISOString();
+      AuthService.saveUser(current);
+    }
+    return {
+      success: true,
+      statuscode: 200,
+      message: response.data?.message || "Email verified successfully",
+      data: current!,
+    };
   },
 
   logout: (): void => {

@@ -9,6 +9,7 @@ export interface User {
   token?: string;
   role_id?: number | string;
   permission_id?: number | string;
+  email_verified_at?: string | null;
   expired?: string;
   status?: boolean;
   role?: Role;
