@@ -322,6 +322,29 @@ export const AuthService = {
     };
   },
 
+  updateEmail: async (newEmail: string, currentPassword?: string): Promise<ApiResponse<User>> => {
+    const response = await apiClient.post("/auth/update-email", {
+      email: newEmail,
+      password: currentPassword,
+    });
+    const resData = response.data?.data || response.data || response;
+    const rawUser = resData.user || resData;
+
+    const current = AuthService.getCurrentUser();
+    if (current) {
+      current.email = rawUser.email || newEmail;
+      current.email_verified_at = null;
+      AuthService.saveUser(current);
+    }
+
+    return {
+      success: true,
+      statuscode: 200,
+      message: response.data?.message || "Email updated successfully",
+      data: current || rawUser,
+    };
+  },
+
   logout: (): void => {
     localStorage.removeItem(STORAGE_KEY_USER);
     localStorage.removeItem(STORAGE_KEY_TOKEN);

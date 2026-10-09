@@ -14,6 +14,9 @@ import {
   Calendar,
   PackageCheck,
   ChevronRight,
+  Edit2,
+  Check,
+  X,
 } from "lucide-react";
 import type { User } from "../model";
 import { authService } from "../services/authService";
@@ -35,6 +38,13 @@ export const ProfilePage: React.FC = () => {
   const [address, setAddress] = useState("Phnom Penh, Cambodia");
   const [avatar, setAvatar] = useState<string>("");
   const [savedSuccess, setSavedSuccess] = useState(false);
+
+  // Edit Email State
+  const [isEditingEmail, setIsEditingEmail] = useState<boolean>(false);
+  const [newEmailInput, setNewEmailInput] = useState<string>("");
+  const [updatingEmail, setUpdatingEmail] = useState<boolean>(false);
+  const [emailUpdateError, setEmailUpdateError] = useState<string>("");
+  const [emailUpdateSuccess, setEmailUpdateSuccess] = useState<string>("");
 
   // Orders / Invoices State
   const [orders, setOrders] = useState<any[]>([]);
@@ -251,6 +261,54 @@ export const ProfilePage: React.FC = () => {
     }
   };
 
+  const handleStartEditEmail = () => {
+    setNewEmailInput(currentUser?.email || email);
+    setEmailUpdateError("");
+    setEmailUpdateSuccess("");
+    setIsEditingEmail(true);
+  };
+
+  const handleCancelEditEmail = () => {
+    setIsEditingEmail(false);
+    setEmailUpdateError("");
+  };
+
+  const handleSaveNewEmail = async () => {
+    if (!newEmailInput || !newEmailInput.includes("@")) {
+      setEmailUpdateError("Please enter a valid email address.");
+      return;
+    }
+
+    if (newEmailInput.toLowerCase() === (currentUser?.email || "").toLowerCase()) {
+      setIsEditingEmail(false);
+      return;
+    }
+
+    setUpdatingEmail(true);
+    setEmailUpdateError("");
+
+    try {
+      await authService.updateEmail(newEmailInput);
+      setEmail(newEmailInput);
+      if (currentUser) {
+        const updated = {
+          ...currentUser,
+          email: newEmailInput,
+          email_verified_at: null,
+        };
+        setCurrentUser(updated);
+        authService.saveUser(updated);
+      }
+      setIsEditingEmail(false);
+      setEmailUpdateSuccess("Email updated! Click 'Verify Email' to send code to your new address.");
+      setTimeout(() => setEmailUpdateSuccess(""), 6000);
+    } catch (err: any) {
+      setEmailUpdateError(err?.response?.data?.message || err?.message || "Failed to update email.");
+    } finally {
+      setUpdatingEmail(false);
+    }
+  };
+
   const handleSaveProfile = (e: React.FormEvent) => {
     e.preventDefault();
     if (currentUser) {
@@ -428,7 +486,9 @@ export const ProfilePage: React.FC = () => {
 
                 <div className="mb-3">
                   <div className="d-flex justify-content-between align-items-center mb-1">
-                    <label className="form-label small fw-bold text-secondary mb-0">Email Address (Read only)</label>
+                    <label className="form-label small fw-bold text-secondary mb-0">
+                      {isEditingEmail ? "Update Email Address" : "Email Address"}
+                    </label>
                     {currentUser.email_verified_at ? (
                       <span className="badge bg-success-subtle text-success border border-success-subtle px-2.5 py-1 rounded-pill small fw-semibold d-inline-flex align-items-center gap-1">
                         <CheckCircle2 size={13} className="text-success" /> Verified
@@ -439,27 +499,95 @@ export const ProfilePage: React.FC = () => {
                       </span>
                     )}
                   </div>
-                  <div className="input-group">
-                    <span className="input-group-text bg-light text-muted">
-                      <Mail size={18} />
-                    </span>
-                    <input
-                      type="email"
-                      className="form-control bg-light"
-                      value={email}
-                      disabled
-                    />
-                    {!currentUser.email_verified_at && (
-                      <button
-                        type="button"
-                        onClick={handleOpenVerifyModal}
-                        className="btn btn-outline-primary fw-bold d-flex align-items-center gap-1 px-3 shadow-xs"
-                        style={{ fontSize: "13px" }}
-                      >
-                        <ShieldCheck size={15} /> Verify Email
-                      </button>
-                    )}
-                  </div>
+
+                  {isEditingEmail ? (
+                    <div>
+                      <div className="input-group">
+                        <span className="input-group-text bg-white text-muted">
+                          <Mail size={18} />
+                        </span>
+                        <input
+                          type="email"
+                          className="form-control"
+                          placeholder="Enter your real email address"
+                          value={newEmailInput}
+                          onChange={(e) => setNewEmailInput(e.target.value)}
+                          disabled={updatingEmail}
+                          autoFocus
+                        />
+                        <button
+                          type="button"
+                          onClick={handleSaveNewEmail}
+                          disabled={updatingEmail || !newEmailInput.trim()}
+                          className="btn btn-primary fw-bold d-flex align-items-center gap-1 px-3 shadow-xs"
+                          style={{ backgroundColor: "#1877F2" }}
+                        >
+                          {updatingEmail ? (
+                            <span className="spinner-border spinner-border-sm" role="status" />
+                          ) : (
+                            <>
+                              <Check size={15} /> Save
+                            </>
+                          )}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleCancelEditEmail}
+                          disabled={updatingEmail}
+                          className="btn btn-outline-secondary fw-semibold d-flex align-items-center gap-1 px-3"
+                        >
+                          <X size={15} /> Cancel
+                        </button>
+                      </div>
+                      <div className="small text-muted mt-1 ps-1">
+                        Make sure to enter an active email (e.g. Gmail) where you can receive your 6-digit OTP code.
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="input-group">
+                      <span className="input-group-text bg-light text-muted">
+                        <Mail size={18} />
+                      </span>
+                      <input
+                        type="email"
+                        className="form-control bg-light"
+                        value={email}
+                        disabled
+                      />
+                      {!currentUser.email_verified_at && (
+                        <>
+                          <button
+                            type="button"
+                            onClick={handleStartEditEmail}
+                            className="btn btn-outline-secondary fw-semibold d-flex align-items-center gap-1 px-3 shadow-xs"
+                            style={{ fontSize: "13px" }}
+                            title="Fix or change your email address"
+                          >
+                            <Edit2 size={14} /> Change Email
+                          </button>
+                          <button
+                            type="button"
+                            onClick={handleOpenVerifyModal}
+                            className="btn btn-outline-primary fw-bold d-flex align-items-center gap-1 px-3 shadow-xs"
+                            style={{ fontSize: "13px" }}
+                          >
+                            <ShieldCheck size={15} /> Verify Email
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  )}
+
+                  {emailUpdateError && (
+                    <div className="alert alert-danger py-1.5 px-3 small rounded-3 mt-2 mb-0">
+                      {emailUpdateError}
+                    </div>
+                  )}
+                  {emailUpdateSuccess && (
+                    <div className="alert alert-success py-1.5 px-3 small rounded-3 mt-2 mb-0">
+                      {emailUpdateSuccess}
+                    </div>
+                  )}
                 </div>
 
                 <div className="mb-3">
