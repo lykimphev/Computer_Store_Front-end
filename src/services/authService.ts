@@ -349,6 +349,8 @@ export const AuthService = {
     localStorage.removeItem(STORAGE_KEY_USER);
     localStorage.removeItem(STORAGE_KEY_TOKEN);
     localStorage.removeItem("kp_computer_cart_items");
+    localStorage.removeItem("kp_login_failed_attempts");
+    localStorage.removeItem("kp_login_lockout_until");
     window.dispatchEvent(new Event("cart-updated"));
   },
 };

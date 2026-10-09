@@ -44,11 +44,6 @@ export const LoginPage: React.FC<LoginPageProps> = ({
           localStorage.removeItem(STORAGE_KEY_LOCKOUT);
           localStorage.removeItem(STORAGE_KEY_ATTEMPTS);
         }
-      } else {
-        const storedAttempts = localStorage.getItem(STORAGE_KEY_ATTEMPTS);
-        if (storedAttempts) {
-          setFailedAttempts(parseInt(storedAttempts, 10) || 0);
-        }
       }
     } catch {}
   }, []);
@@ -161,6 +156,12 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                 avatar: googleUser.picture,
                 mode: 'login',
               }, 'login');
+
+              // Reset attempts on successful Google login
+              localStorage.removeItem(STORAGE_KEY_LOCKOUT);
+              localStorage.removeItem(STORAGE_KEY_ATTEMPTS);
+              setFailedAttempts(0);
+              setLockoutSeconds(0);
 
               if (onLoginSuccess) onLoginSuccess(res.data);
               navigate('/');
@@ -312,7 +313,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                   <Clock size={13} className="text-danger" />
                   <span>Locked: {Math.floor(lockoutSeconds / 60)}:{String(lockoutSeconds % 60).padStart(2, '0')}</span>
                 </div>
-              ) : failedAttempts > 0 ? (
+              ) : failedAttempts > 0 && !!errorMsg ? (
                 <div
                   className="d-flex align-items-center gap-1 bg-warning-subtle text-warning-emphasis px-2 py-0.5 rounded-2 border border-warning-subtle fw-semibold"
                   style={{ fontSize: '11.5px' }}
