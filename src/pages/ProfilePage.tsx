@@ -841,9 +841,22 @@ export const ProfilePage: React.FC = () => {
                     )}
 
                     {previewCode && (
-                      <div className="alert alert-info py-2 small rounded-3 mb-3 d-flex align-items-center justify-content-between">
-                        <span className="small">OTP Code:</span>
-                        <strong className="fs-6 font-monospace text-primary">{previewCode}</strong>
+                      <div className="alert alert-info py-2 px-3 small rounded-3 mb-3 d-flex align-items-center justify-content-between">
+                        <div className="text-start">
+                          <div className="fw-semibold text-primary" style={{ fontSize: "12px" }}>OTP Code (Test Mode):</div>
+                          <strong className="fs-6 font-monospace text-primary">{previewCode}</strong>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const digits = previewCode.split("").slice(0, 6);
+                            setOtpDigits(digits);
+                          }}
+                          className="btn btn-sm btn-outline-primary rounded-pill px-2.5 py-0.5 fw-bold"
+                          style={{ fontSize: "12px" }}
+                        >
+                          Auto-Fill
+                        </button>
                       </div>
                     )}
 
