@@ -53,30 +53,14 @@ export const ProfilePage: React.FC = () => {
   const [loadingOrders, setLoadingOrders] = useState<boolean>(false);
   const [selectedInvoice, setSelectedInvoice] = useState<any | null>(null);
 
-  // Email Verification State
-  const [showVerifyModal, setShowVerifyModal] = useState<boolean>(false);
-  const [otpDigits, setOtpDigits] = useState<string[]>(["", "", "", "", "", ""]);
-  const [sendingOtp, setSendingOtp] = useState<boolean>(false);
-  const [verifyingOtp, setVerifyingOtp] = useState<boolean>(false);
-  const [verifyError, setVerifyError] = useState<string>("");
-  const [verifySuccess, setVerifySuccess] = useState<boolean>(false);
-  const [previewCode, setPreviewCode] = useState<string | null>(null);
-  const [resendCooldown, setResendCooldown] = useState<number>(0);
-  const otpInputRefs = useRef<(HTMLInputElement | null)[]>([]);
+  // Direct Email Verification State
+  const [verifyingEmail, setVerifyingEmail] = useState<boolean>(false);
+  const [verifyEmailSuccess, setVerifyEmailSuccess] = useState<boolean>(false);
 
   // Delete Account State
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
   const [deletingAccount, setDeletingAccount] = useState<boolean>(false);
   const [deleteError, setDeleteError] = useState<string>("");
-
-  // Cooldown countdown
-  useEffect(() => {
-    if (resendCooldown <= 0) return;
-    const timer = setInterval(() => {
-      setResendCooldown((prev) => (prev <= 1 ? 0 : prev - 1));
-    }, 1000);
-    return () => clearInterval(timer);
-  }, [resendCooldown]);
 
   useEffect(() => {
     const u = authService.getCurrentUser();
@@ -160,96 +144,10 @@ export const ProfilePage: React.FC = () => {
     }
   };
 
-  const handleOpenVerifyModal = async () => {
-    setOtpDigits(["", "", "", "", "", ""]);
-    setVerifyError("");
-    setVerifySuccess(false);
-    setPreviewCode(null);
-    setShowVerifyModal(true);
-    setSendingOtp(true);
-
+  const handleDirectVerify = async () => {
+    setVerifyingEmail(true);
     try {
-      const res = await authService.sendVerificationOtp();
-      if (res.preview_code) {
-        setPreviewCode(res.preview_code);
-      }
-      setResendCooldown(30);
-    } catch (err: any) {
-      setVerifyError(err?.response?.data?.message || err?.message || "Failed to send verification code.");
-    } finally {
-      setSendingOtp(false);
-    }
-  };
-
-  const handleResendOtp = async () => {
-    if (resendCooldown > 0 || sendingOtp) return;
-    setSendingOtp(true);
-    setVerifyError("");
-
-    try {
-      const res = await authService.sendVerificationOtp();
-      if (res.preview_code) {
-        setPreviewCode(res.preview_code);
-      }
-      setResendCooldown(30);
-    } catch (err: any) {
-      setVerifyError(err?.response?.data?.message || err?.message || "Failed to resend code.");
-    } finally {
-      setSendingOtp(false);
-    }
-  };
-
-  const handleOtpChange = (index: number, val: string) => {
-    const cleaned = val.replace(/\D/g, "");
-    if (!cleaned) {
-      const copy = [...otpDigits];
-      copy[index] = "";
-      setOtpDigits(copy);
-      return;
-    }
-
-    const copy = [...otpDigits];
-    copy[index] = cleaned[cleaned.length - 1];
-    setOtpDigits(copy);
-
-    if (index < 5 && cleaned) {
-      otpInputRefs.current[index + 1]?.focus();
-    }
-  };
-
-  const handleOtpKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Backspace" && !otpDigits[index] && index > 0) {
-      otpInputRefs.current[index - 1]?.focus();
-    }
-  };
-
-  const handleOtpPaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
-    e.preventDefault();
-    const pasteData = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
-    if (!pasteData) return;
-
-    const copy = [...otpDigits];
-    for (let i = 0; i < 6; i++) {
-      copy[i] = pasteData[i] || "";
-    }
-    setOtpDigits(copy);
-    const nextIdx = Math.min(pasteData.length, 5);
-    otpInputRefs.current[nextIdx]?.focus();
-  };
-
-  const handleVerifySubmit = async () => {
-    const code = otpDigits.join("");
-    if (code.length !== 6) {
-      setVerifyError("Please enter all 6 digits of the code.");
-      return;
-    }
-
-    setVerifyingOtp(true);
-    setVerifyError("");
-
-    try {
-      const res = await authService.verifyOtp(code);
-      setVerifySuccess(true);
+      const res = await authService.verifyEmailDirect();
       if (currentUser) {
         const updated = {
           ...currentUser,
@@ -258,13 +156,12 @@ export const ProfilePage: React.FC = () => {
         setCurrentUser(updated);
         authService.saveUser(updated);
       }
-      setTimeout(() => {
-        setShowVerifyModal(false);
-      }, 1500);
+      setVerifyEmailSuccess(true);
+      setTimeout(() => setVerifyEmailSuccess(false), 4000);
     } catch (err: any) {
-      setVerifyError(err?.response?.data?.message || err?.message || "Invalid verification code.");
+      console.error("Verification failed:", err);
     } finally {
-      setVerifyingOtp(false);
+      setVerifyingEmail(false);
     }
   };
 
@@ -403,12 +300,13 @@ export const ProfilePage: React.FC = () => {
               ) : (
                 <button
                   type="button"
-                  onClick={handleOpenVerifyModal}
+                  onClick={handleDirectVerify}
+                  disabled={verifyingEmail}
                   className="badge bg-warning-subtle text-warning-emphasis border-0 px-2.5 py-1.5 rounded-pill fw-bold d-inline-flex align-items-center gap-1"
                   style={{ fontSize: "11px", cursor: "pointer" }}
-                  title="Click to verify email"
+                  title="Click to directly verify email"
                 >
-                  <ShieldCheck size={12} /> Verify Email
+                  <ShieldCheck size={12} /> {verifyingEmail ? "Verifying..." : "Verify Email"}
                 </button>
               )}
             </div>
@@ -588,17 +486,32 @@ export const ProfilePage: React.FC = () => {
                           </button>
                           <button
                             type="button"
-                            onClick={handleOpenVerifyModal}
+                            onClick={handleDirectVerify}
+                            disabled={verifyingEmail}
                             className="btn btn-outline-primary fw-bold d-flex align-items-center gap-1 px-3 shadow-xs"
                             style={{ fontSize: "13px" }}
                           >
-                            <ShieldCheck size={15} /> Verify Email
+                            {verifyingEmail ? (
+                              <>
+                                <span className="spinner-border spinner-border-sm" role="status" />
+                                <span>Verifying...</span>
+                              </>
+                            ) : (
+                              <>
+                                <ShieldCheck size={15} /> Verify Email
+                              </>
+                            )}
                           </button>
                         </>
                       )}
                     </div>
                   )}
 
+                  {verifyEmailSuccess && (
+                    <div className="alert alert-success py-1.5 px-3 small rounded-3 mt-2 mb-0 d-flex align-items-center gap-2">
+                      <CheckCircle2 size={16} className="text-success" /> Email verified successfully!
+                    </div>
+                  )}
                   {emailUpdateError && (
                     <div className="alert alert-danger py-1.5 px-3 small rounded-3 mt-2 mb-0">
                       {emailUpdateError}
@@ -818,154 +731,6 @@ export const ProfilePage: React.FC = () => {
           order={selectedInvoice}
           onClose={() => setSelectedInvoice(null)}
         />
-      )}
-
-      {/* 6-Digit OTP Email Verification Modal */}
-      {showVerifyModal && (
-        <div
-          className="modal fade show d-block"
-          tabIndex={-1}
-          style={{ backgroundColor: "rgba(0, 0, 0, 0.6)", backdropFilter: "blur(4px)", zIndex: 1060 }}
-        >
-          <div className="modal-dialog modal-dialog-centered" style={{ maxWidth: "420px" }}>
-            <div className="modal-content border-0 rounded-4 shadow-lg overflow-hidden">
-              {/* Modal Header */}
-              <div
-                className="modal-header border-0 bg-primary text-white p-4 text-center d-flex flex-column align-items-center position-relative"
-                style={{ backgroundColor: "#1877F2" }}
-              >
-                <button
-                  type="button"
-                  className="btn-close btn-close-white position-absolute top-0 end-0 m-3"
-                  onClick={() => setShowVerifyModal(false)}
-                  aria-label="Close"
-                />
-                <div
-                  className="rounded-circle bg-white text-primary p-3 mb-2 shadow-sm d-flex align-items-center justify-content-center"
-                  style={{ width: "64px", height: "64px" }}
-                >
-                  <Mail size={32} color="#1877F2" />
-                </div>
-                <h5 className="modal-title fw-bold mb-1">Verify Your Email</h5>
-                <p className="small opacity-75 mb-0 text-center" style={{ fontSize: "13px" }}>
-                  We sent a 6-digit verification code to <br />
-                  <strong className="text-white">{currentUser?.email}</strong>
-                </p>
-              </div>
-
-              {/* Modal Body */}
-              <div className="modal-body p-4 text-center">
-                {verifySuccess ? (
-                  <div className="py-4">
-                    <div
-                      className="rounded-circle bg-success-subtle text-success mx-auto mb-3 d-flex align-items-center justify-content-center"
-                      style={{ width: "64px", height: "64px" }}
-                    >
-                      <CheckCircle2 size={36} />
-                    </div>
-                    <h5 className="fw-bold text-success mb-1">Email Verified!</h5>
-                    <p className="text-muted small mb-0">Your account is now fully verified & activated.</p>
-                  </div>
-                ) : (
-                  <>
-                    {verifyError && (
-                      <div className="alert alert-danger py-2 small rounded-3 mb-3 text-start">
-                        {verifyError}
-                      </div>
-                    )}
-
-                    {previewCode && (
-                      <div className="alert alert-info py-2 px-3 small rounded-3 mb-3 d-flex align-items-center justify-content-between">
-                        <div className="text-start">
-                          <div className="fw-semibold text-primary" style={{ fontSize: "12px" }}>OTP Code (Test Mode):</div>
-                          <strong className="fs-6 font-monospace text-primary">{previewCode}</strong>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            const digits = previewCode.split("").slice(0, 6);
-                            setOtpDigits(digits);
-                          }}
-                          className="btn btn-sm btn-outline-primary rounded-pill px-2.5 py-0.5 fw-bold"
-                          style={{ fontSize: "12px" }}
-                        >
-                          Auto-Fill
-                        </button>
-                      </div>
-                    )}
-
-                    <label className="form-label small fw-bold text-secondary mb-3">
-                      Enter 6-digit Code
-                    </label>
-
-                    {/* 6 Digit Inputs */}
-                    <div className="d-flex justify-content-center gap-2 mb-4">
-                      {otpDigits.map((digit, idx) => (
-                        <input
-                          key={idx}
-                          ref={(el) => {
-                            otpInputRefs.current[idx] = el;
-                          }}
-                          type="text"
-                          inputMode="numeric"
-                          maxLength={1}
-                          value={digit}
-                          onChange={(e) => handleOtpChange(idx, e.target.value)}
-                          onKeyDown={(e) => handleOtpKeyDown(idx, e)}
-                          onPaste={handleOtpPaste}
-                          className="form-control text-center fw-bold fs-5 rounded-3 border-2"
-                          style={{
-                            width: "48px",
-                            height: "54px",
-                            borderColor: digit ? "#1877F2" : "#dee2e6",
-                            backgroundColor: digit ? "#f0f7ff" : "#ffffff",
-                          }}
-                          autoFocus={idx === 0}
-                        />
-                      ))}
-                    </div>
-
-                    {/* Verify Button */}
-                    <button
-                      type="button"
-                      onClick={handleVerifySubmit}
-                      disabled={verifyingOtp || otpDigits.join("").length !== 6}
-                      className="btn btn-primary w-100 py-2.5 rounded-3 fw-bold shadow-sm d-flex align-items-center justify-content-center gap-2 mb-3"
-                      style={{ backgroundColor: "#1877F2" }}
-                    >
-                      {verifyingOtp ? (
-                        <span>Verifying...</span>
-                      ) : (
-                        <>
-                          <ShieldCheck size={18} /> Confirm & Verify
-                        </>
-                      )}
-                    </button>
-
-                    {/* Resend Action */}
-                    <div className="small text-muted">
-                      Didn't receive the code?{" "}
-                      {resendCooldown > 0 ? (
-                        <span className="text-secondary fw-semibold">
-                          Resend in {resendCooldown}s
-                        </span>
-                      ) : (
-                        <button
-                          type="button"
-                          onClick={handleResendOtp}
-                          disabled={sendingOtp}
-                          className="btn btn-link p-0 small fw-bold text-decoration-none"
-                        >
-                          {sendingOtp ? "Sending..." : "Resend Code"}
-                        </button>
-                      )}
-                    </div>
-                  </>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
       )}
 
       {/* Delete Account Confirmation Modal */}
