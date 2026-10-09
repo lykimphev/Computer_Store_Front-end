@@ -345,6 +345,12 @@ export const AuthService = {
     };
   },
 
+  deleteAccount: async (): Promise<ApiResponse<void>> => {
+    const response = await apiClient.delete("/auth/delete-account");
+    AuthService.logout();
+    return response.data;
+  },
+
   logout: (): void => {
     localStorage.removeItem(STORAGE_KEY_USER);
     localStorage.removeItem(STORAGE_KEY_TOKEN);

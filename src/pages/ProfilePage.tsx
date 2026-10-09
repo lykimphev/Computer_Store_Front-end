@@ -17,6 +17,8 @@ import {
   Edit2,
   Check,
   X,
+  Trash2,
+  AlertTriangle,
 } from "lucide-react";
 import type { User } from "../model";
 import { authService } from "../services/authService";
@@ -61,6 +63,11 @@ export const ProfilePage: React.FC = () => {
   const [previewCode, setPreviewCode] = useState<string | null>(null);
   const [resendCooldown, setResendCooldown] = useState<number>(0);
   const otpInputRefs = useRef<(HTMLInputElement | null)[]>([]);
+
+  // Delete Account State
+  const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
+  const [deletingAccount, setDeletingAccount] = useState<boolean>(false);
+  const [deleteError, setDeleteError] = useState<string>("");
 
   // Cooldown countdown
   useEffect(() => {
@@ -324,6 +331,20 @@ export const ProfilePage: React.FC = () => {
     authService.logout();
     navigate("/");
     window.location.reload();
+  };
+
+  const handleConfirmDeleteAccount = async () => {
+    setDeletingAccount(true);
+    setDeleteError("");
+    try {
+      await authService.deleteAccount();
+      setShowDeleteModal(false);
+      navigate("/login");
+      window.location.reload();
+    } catch (err: any) {
+      setDeleteError(err?.response?.data?.message || err?.message || "Failed to delete account.");
+      setDeletingAccount(false);
+    }
   };
 
   if (!currentUser) return null;
@@ -620,7 +641,20 @@ export const ProfilePage: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="d-flex justify-content-end">
+                <div className="d-flex justify-content-between align-items-center flex-wrap gap-2 pt-2 border-top">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setDeleteError("");
+                      setShowDeleteModal(true);
+                    }}
+                    className="btn btn-outline-danger px-3.5 py-2.5 rounded-pill fw-semibold d-flex align-items-center gap-2 shadow-xs"
+                    style={{ fontSize: "14px" }}
+                    title="Permanently delete your account"
+                  >
+                    <Trash2 size={16} /> Delete Account
+                  </button>
+
                   <button
                     type="submit"
                     className="btn btn-primary px-4 py-2.5 rounded-pill fw-bold shadow-sm"
@@ -928,6 +962,81 @@ export const ProfilePage: React.FC = () => {
                     </div>
                   </>
                 )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Account Confirmation Modal */}
+      {showDeleteModal && (
+        <div
+          className="modal fade show d-block"
+          tabIndex={-1}
+          style={{ backgroundColor: "rgba(0, 0, 0, 0.6)", backdropFilter: "blur(4px)", zIndex: 1060 }}
+        >
+          <div className="modal-dialog modal-dialog-centered" style={{ maxWidth: "440px" }}>
+            <div className="modal-content border-0 rounded-4 shadow-lg overflow-hidden">
+              <div
+                className="modal-header border-0 bg-danger text-white p-4 text-center d-flex flex-column align-items-center position-relative"
+                style={{ backgroundColor: "#dc3545" }}
+              >
+                <button
+                  type="button"
+                  className="btn-close btn-close-white position-absolute top-0 end-0 m-3"
+                  onClick={() => !deletingAccount && setShowDeleteModal(false)}
+                  disabled={deletingAccount}
+                  aria-label="Close"
+                />
+                <div
+                  className="rounded-circle bg-white text-danger p-3 mb-2 shadow-sm d-flex align-items-center justify-content-center"
+                  style={{ width: "64px", height: "64px" }}
+                >
+                  <AlertTriangle size={32} color="#dc3545" />
+                </div>
+                <h5 className="modal-title fw-bold mb-1">Delete Account?</h5>
+                <p className="small opacity-90 mb-0 text-center" style={{ fontSize: "13px" }}>
+                  This action is permanent and cannot be undone.
+                </p>
+              </div>
+
+              <div className="modal-body p-4 text-center">
+                {deleteError && (
+                  <div className="alert alert-danger py-2 small rounded-3 mb-3 text-start">
+                    {deleteError}
+                  </div>
+                )}
+                <p className="text-secondary small mb-4">
+                  Are you sure you want to delete your account (<strong>{currentUser?.email}</strong>)? All your personal profile information, invoices, and purchase records will be permanently removed.
+                </p>
+
+                <div className="d-flex justify-content-end gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowDeleteModal(false)}
+                    disabled={deletingAccount}
+                    className="btn btn-light px-3.5 py-2 rounded-pill fw-semibold"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleConfirmDeleteAccount}
+                    disabled={deletingAccount}
+                    className="btn btn-danger px-4 py-2 rounded-pill fw-bold shadow-sm d-flex align-items-center gap-2"
+                  >
+                    {deletingAccount ? (
+                      <>
+                        <span className="spinner-border spinner-border-sm" role="status" />
+                        <span>Deleting...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Trash2 size={16} /> Permanently Delete
+                      </>
+                    )}
+                  </button>
+                </div>
               </div>
             </div>
           </div>
