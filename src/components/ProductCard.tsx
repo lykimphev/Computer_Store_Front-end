@@ -16,70 +16,69 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onViewDetail,
   const isOutOfStock = product.stock !== undefined && product.stock <= 0;
 
   return (
-    <div className="card h-100 border rounded-4 shadow-sm p-3 bg-white d-flex flex-column justify-content-between">
-      <div className="text-center py-3 bg-light rounded-4 mb-3 border border-opacity-10 position-relative">
+    <div className="card h-100 border rounded-4 shadow-sm p-2.5 p-sm-3 bg-white d-flex flex-column justify-content-between">
+      <div className="text-center py-2 py-sm-3 bg-light rounded-4 mb-2 border border-opacity-10 position-relative">
         <img
           src={product.image}
           alt={product.name}
           className="img-fluid rounded-3"
-          style={{ height: "180px", objectFit: "contain", opacity: isOutOfStock ? 0.6 : 1 }}
+          style={{ height: "135px", maxHeight: "175px", objectFit: "contain", opacity: isOutOfStock ? 0.6 : 1 }}
           onError={(e) => {
             (e.currentTarget as HTMLImageElement).src = "/Image/Logo.png";
           }}
         />
       </div>
-      <div className="text-center my-2">
-        <h5 className="fw-bold mb-2 text-dark fs-5">{product.name}</h5>
-        <div className="fw-bold fs-4 text-danger mb-2" style={{ color: "#FF0000" }}>
+      <div className="text-center my-1 flex-grow-1 d-flex flex-column justify-content-center">
+        <h5 className="fw-bold mb-1 text-dark fs-6 fs-sm-5" style={{ minHeight: "2.4rem", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
+          {product.name}
+        </h5>
+        <div className="fw-extrabold fs-5 fs-sm-4 text-danger mb-2" style={{ color: "#FF0000" }}>
           ${Number(product.price).toFixed(2)}
         </div>
-        {/* 2. Badge បង្ហាញស្ថានភាពស្តុក (In Stock / Low Stock / Out of Stock) */}
-        <div className="mb-3">
+
+        {/* Combined Stock & Warranty Badges Row */}
+        <div className="d-flex align-items-center justify-content-center gap-1.5 mb-2 flex-wrap">
           {isOutOfStock ? (
-            <span className="badge bg-danger-subtle text-danger border border-danger-subtle px-2.5 py-1 rounded-pill small fw-bold">
+            <span className="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-1 rounded-pill small fw-bold">
               Out of Stock
             </span>
           ) : product.stock !== undefined && product.stock <= 5 ? (
-            <span className="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle px-2.5 py-1 rounded-pill small fw-semibold">
-              Only {product.stock} left in stock!
+            <span className="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle px-2 py-1 rounded-pill small fw-semibold">
+              Only {product.stock} left!
             </span>
           ) : (
-            <span className="badge bg-success-subtle text-success border border-success-subtle px-2.5 py-1 rounded-pill small fw-semibold">
+            <span className="badge bg-success-subtle text-success border border-success-subtle px-2 py-1 rounded-pill small fw-semibold">
               In Stock
             </span>
           )}
-        </div>
-        {/* Warranty Info */}
-        <div className="mb-3">
-          <span className="badge bg-primary-subtle text-primary border border-primary-subtle px-2.5 py-1 rounded-pill small fw-semibold d-inline-flex align-items-center gap-1">
-            <ShieldCheck size={13}/> {product.category === "laptop" ? "2 Year Warranty" : "1 Year Warranty"} 
+          <span className="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1 rounded-pill small fw-semibold d-inline-flex align-items-center gap-1">
+            <ShieldCheck size={12}/> {product.category === "laptop" ? "2 Yr Warranty" : "1 Yr Warranty"} 
           </span>
         </div>
 
+        {/* Compact Modern Tech Specs Pills (Clean Apple-Style Tags) */}
         {product.category === "laptop" && product.specs && (
-          <div className="text-secondary small mb-3">
-            <ul className="list-unstyled mb-0">
-              {product.specs.cpu && (
-                <li>
-                  <strong>CPU:</strong> {product.specs.cpu}
-                </li>
-              )}
-              {product.specs.ram && (
-                <li>
-                  <strong>RAM:</strong> {product.specs.ram}
-                </li>
-              )}
-              {product.specs.storage && (
-                <li>
-                  <strong>Storage:</strong> {product.specs.storage}
-                </li>
-              )}
-              {product.specs.screen && (
-                <li>
-                  <strong>Screen:</strong> {product.specs.screen}
-                </li>
-              )}
-            </ul>
+          <div className="d-flex flex-wrap justify-content-center gap-1 mb-2">
+            {product.specs.cpu && (
+              <span className="badge bg-light text-dark border px-2 py-1 rounded-pill" style={{ fontSize: "10.5px", fontWeight: 500 }}>
+                ⚡ {product.specs.cpu.replace(/^Intel Core\s+|^AMD Ryzen\s+/i, '')}
+              </span>
+            )}
+            {product.specs.ram && (
+              <span className="badge bg-light text-dark border px-2 py-1 rounded-pill" style={{ fontSize: "10.5px", fontWeight: 500 }}>
+                💾 {product.specs.ram}
+              </span>
+            )}
+            {product.specs.storage && (
+              <span className="badge bg-light text-dark border px-2 py-1 rounded-pill" style={{ fontSize: "10.5px", fontWeight: 500 }}>
+                💽 {product.specs.storage}
+              </span>
+            )}
+            {product.specs.screen && (
+              <span className="badge bg-light text-dark border px-2 py-1 rounded-pill" style={{ fontSize: "10.5px", fontWeight: 500 }}>
+                🖥️ {product.specs.screen}
+              </span>
+            )}
           </div>
         )}
       </div>

@@ -43,14 +43,14 @@ export default function MainLayout() {
       <Navbar bg="primary" variant="dark" expand="lg" className="shadow-sm py-2 sticky-top" style={{ backgroundColor: "#1877F2" }}>
         <Container fluid className="px-4">
           <Navbar.Brand href="/" className="fw-bold fs-4 me-auto me-lg-4 d-flex align-items-center gap-2">
-            <div className="rounded-circle bg-white p-1 d-flex align-items-center justify-content-center" style={{ width: "36px", height: "36px" }}>
+            <div className="rounded-circle bg-white p-1 d-flex align-items-center justify-content-center flex-shrink-0" style={{ width: "34px", height: "34px" }}>
               <img src="/Image/Logo.png" alt="Logo" style={{ width: "100%", height: "100%", borderRadius: "50%", objectFit: "cover" }} />
             </div>
-            <span className="fs-5 fs-md-4">KP Computer Store</span>
+            <span className="fs-6 fs-sm-5 fw-bold text-nowrap">KP Computer Store</span>
           </Navbar.Brand>
 
-          {/* Quick Actions on Mobile (Always Visible in Top Bar) */}
-          <div className="d-flex d-lg-none align-items-center gap-2 me-2">
+          {/* Quick Actions & Menu Toggle on Mobile (Always in 1 Single Row) */}
+          <div className="d-flex d-lg-none align-items-center gap-2 ms-auto flex-nowrap">
             <CustomerSupportWidget />
             <NavLink to="/cart" className="position-relative text-white p-1 text-decoration-none" title="Shopping Cart">
               <ShoppingCart size={22} />
@@ -60,9 +60,9 @@ export default function MainLayout() {
                 </span>
               )}
             </NavLink>
+            <Navbar.Toggle aria-controls="main-navbar-nav" className="border-0 p-1 ms-1 text-white shadow-none" style={{ fontSize: "0.85rem" }} />
           </div>
 
-          <Navbar.Toggle aria-controls="main-navbar-nav" />
           <Navbar.Collapse id="main-navbar-nav">
             <Nav className="mx-auto gap-3 py-2 py-lg-0">
               <NavLink
