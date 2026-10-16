@@ -84,7 +84,7 @@ export const ServicesPage: React.FC = () => {
           Bring your PC to our store or contact our technical team on Telegram for instant assistance.
         </p>
         <div className="d-flex flex-wrap justify-content-center gap-3">
-          <a href="https://t.me/kp_computer" target="_blank" rel="noreferrer" className="btn btn-light rounded-pill px-4 py-2.5 fw-bold text-primary shadow-sm">
+          <a href="https://t.me/computerstore_kp_bot" target="_blank" rel="noreferrer" className="btn btn-light rounded-pill px-4 py-2.5 fw-bold text-primary shadow-sm">
             Contact Technical Team on Telegram
           </a>
         </div>
