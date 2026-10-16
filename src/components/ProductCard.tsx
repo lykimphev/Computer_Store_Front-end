@@ -1,6 +1,6 @@
 import React from "react";
 import type { Product } from "../model";
-import { ShoppingCart, ShieldCheck } from "lucide-react";
+import { ShoppingCart } from "lucide-react";
 
 interface ProductCardProps {
   product: Product;
@@ -9,102 +9,120 @@ interface ProductCardProps {
 }
 
 /**
- * PRODUCT CARD COMPONENT
- * Displays Product Image, Name, Price, View Detail, and Direct Add to Cart buttons.
+ * APPLE-STYLE MINIMALIST PRODUCT CARD
+ * ====================================
+ * Clean, modern, high-conversion design with spacious typography,
+ * subtle muted specs, and pill buttons.
  */
 export const ProductCard: React.FC<ProductCardProps> = ({ product, onViewDetail, onAddToCart }) => {
   const isOutOfStock = product.stock !== undefined && product.stock <= 0;
 
+  // Clean Apple-style single-line spec summary (no cluttered badges)
+  const getSpecSummary = () => {
+    if (product.category !== "laptop" || !product.specs) {
+      return product.brand ? `${product.brand.toUpperCase()} Series` : null;
+    }
+    const parts: string[] = [];
+    if (product.specs.cpu) {
+      parts.push(product.specs.cpu.replace(/^Intel Core\s+|^AMD Ryzen\s+/i, "").trim());
+    }
+    if (product.specs.ram) {
+      parts.push(product.specs.ram.trim());
+    }
+    if (product.specs.storage) {
+      parts.push(product.specs.storage.replace(/\s+Gen\d+/i, "").trim());
+    }
+    return parts.slice(0, 3).join(" • ");
+  };
+
+  const specSummary = getSpecSummary();
+
   return (
-    <div className="card h-100 border rounded-4 shadow-sm p-2.5 p-sm-3 bg-white d-flex flex-column justify-content-between">
-      <div className="text-center py-2 py-sm-3 bg-light rounded-4 mb-2 border border-opacity-10 position-relative">
+    <div className="card h-100 border border-light-subtle rounded-4 shadow-sm p-3 bg-white d-flex flex-column justify-content-between transition-all" style={{ borderRadius: "20px" }}>
+      {/* 1. Seamless Product Photo */}
+      <div 
+        className="text-center py-3 bg-light rounded-4 mb-2 d-flex align-items-center justify-content-center position-relative overflow-hidden" 
+        style={{ height: "155px", cursor: "pointer", backgroundColor: "#f8fafc" }}
+        onClick={() => onViewDetail(product)}
+      >
         <img
           src={product.image}
           alt={product.name}
-          className="img-fluid rounded-3"
-          style={{ height: "135px", maxHeight: "175px", objectFit: "contain", opacity: isOutOfStock ? 0.6 : 1 }}
+          className="img-fluid"
+          style={{ maxHeight: "135px", maxWidth: "90%", objectFit: "contain", opacity: isOutOfStock ? 0.6 : 1, transition: "transform 0.3s ease" }}
           onError={(e) => {
             (e.currentTarget as HTMLImageElement).src = "/Image/Logo.png";
           }}
         />
+        {isOutOfStock && (
+          <span className="position-absolute badge bg-dark bg-opacity-75 text-white px-3 py-1.5 rounded-pill small fw-semibold">
+            Out of Stock
+          </span>
+        )}
       </div>
+
+      {/* 2. Content Info (Clean Typography) */}
       <div className="text-center my-1 flex-grow-1 d-flex flex-column justify-content-center">
-        <h5 className="fw-bold mb-1 text-dark fs-6 fs-sm-5" style={{ minHeight: "2.4rem", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
+        {/* Title */}
+        <h5 
+          className="fw-bold mb-1 text-dark fs-6" 
+          style={{ minHeight: "2.6rem", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden", lineHeight: "1.3" }}
+          title={product.name}
+        >
           {product.name}
         </h5>
-        <div className="fw-extrabold fs-5 fs-sm-4 text-danger mb-2" style={{ color: "#FF0000" }}>
+
+        {/* Apple-Style Clean Muted Spec Summary (No chunky badge clutter) */}
+        <div className="text-muted small mb-2 fw-medium" style={{ fontSize: "11.5px", minHeight: "17px", letterSpacing: "0.2px" }}>
+          {specSummary || "\u00A0"}
+        </div>
+
+        {/* Price */}
+        <div className="fw-bold fs-5 text-dark mb-1" style={{ letterSpacing: "-0.3px" }}>
           ${Number(product.price).toFixed(2)}
         </div>
 
-        {/* Combined Stock & Warranty Badges Row */}
-        <div className="d-flex align-items-center justify-content-center gap-1.5 mb-2 flex-wrap">
-          {isOutOfStock ? (
-            <span className="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-1 rounded-pill small fw-bold">
-              Out of Stock
-            </span>
-          ) : product.stock !== undefined && product.stock <= 5 ? (
-            <span className="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle px-2 py-1 rounded-pill small fw-semibold">
-              Only {product.stock} left!
-            </span>
+        {/* Subtle Stock & Warranty Status Line */}
+        <div className="d-flex align-items-center justify-content-center gap-2 mb-2 text-muted" style={{ fontSize: "11.5px" }}>
+          {!isOutOfStock ? (
+            product.stock !== undefined && product.stock <= 5 ? (
+              <span className="text-warning-emphasis fw-semibold">● Only {product.stock} left</span>
+            ) : (
+              <span className="text-success fw-semibold">● In Stock</span>
+            )
           ) : (
-            <span className="badge bg-success-subtle text-success border border-success-subtle px-2 py-1 rounded-pill small fw-semibold">
-              In Stock
-            </span>
+            <span className="text-danger fw-semibold">● Out of Stock</span>
           )}
-          <span className="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1 rounded-pill small fw-semibold d-inline-flex align-items-center gap-1">
-            <ShieldCheck size={12}/> {product.category === "laptop" ? "2 Yr Warranty" : "1 Yr Warranty"} 
-          </span>
+          <span className="opacity-50">·</span>
+          <span>{product.category === "laptop" ? "2-Yr Warranty" : "1-Yr Warranty"}</span>
         </div>
-
-        {/* Compact Modern Tech Specs Pills (Clean Apple-Style Tags) */}
-        {product.category === "laptop" && product.specs && (
-          <div className="d-flex flex-wrap justify-content-center gap-1 mb-2">
-            {product.specs.cpu && (
-              <span className="badge bg-light text-dark border px-2 py-1 rounded-pill" style={{ fontSize: "10.5px", fontWeight: 500 }}>
-                ⚡ {product.specs.cpu.replace(/^Intel Core\s+|^AMD Ryzen\s+/i, '')}
-              </span>
-            )}
-            {product.specs.ram && (
-              <span className="badge bg-light text-dark border px-2 py-1 rounded-pill" style={{ fontSize: "10.5px", fontWeight: 500 }}>
-                💾 {product.specs.ram}
-              </span>
-            )}
-            {product.specs.storage && (
-              <span className="badge bg-light text-dark border px-2 py-1 rounded-pill" style={{ fontSize: "10.5px", fontWeight: 500 }}>
-                💽 {product.specs.storage}
-              </span>
-            )}
-            {product.specs.screen && (
-              <span className="badge bg-light text-dark border px-2 py-1 rounded-pill" style={{ fontSize: "10.5px", fontWeight: 500 }}>
-                🖥️ {product.specs.screen}
-              </span>
-            )}
-          </div>
-        )}
       </div>
+
+      {/* 3. Action Buttons (Clean Rounded Pills) */}
       <div className="pt-2 d-flex gap-2">
         <button
-          className="btn btn-outline-primary flex-grow-1 py-2 rounded-3 fw-bold shadow-sm d-flex align-items-center justify-content-center gap-1"
+          className="btn btn-primary flex-grow-1 py-2 rounded-pill fw-semibold shadow-sm text-nowrap d-flex align-items-center justify-content-center"
+          style={{ backgroundColor: "#1877F2", borderColor: "#1877F2", fontSize: "13.5px" }}
           onClick={() => onViewDetail(product)}
         >
-          View Detail
+          View Details
         </button>
-        {/* 3. ប៊ូតុង Add to Cart (បើអស់ស្តុក នឹងក្លាយជាពណ៌ប្រផេះ ហើយចុចលែងកើត) */}
         {onAddToCart && (
           <button
-            className={`btn py-2 px-3 rounded-3 fw-bold shadow-sm d-flex align-items-center justify-content-center ${
-              isOutOfStock ? "btn-secondary opacity-50" : "text-white"
+            className={`btn py-2 px-3 rounded-pill fw-bold shadow-sm d-flex align-items-center justify-content-center ${
+              isOutOfStock ? "btn-secondary opacity-50" : "btn-light border"
             }`}
             style={{
-              backgroundColor: isOutOfStock ? "#6c757d" : "#1877F2",
-              borderColor: isOutOfStock ? "#6c757d" : "#1877F2",
+              backgroundColor: isOutOfStock ? "#6c757d" : "#f1f5f9",
+              borderColor: isOutOfStock ? "#6c757d" : "#e2e8f0",
+              color: isOutOfStock ? "#ffffff" : "#1877F2",
               cursor: isOutOfStock ? "not-allowed" : "pointer",
             }}
             onClick={() => !isOutOfStock && onAddToCart(product)}
             disabled={isOutOfStock}
-            title={isOutOfStock ? "Product is out of stock" : "Add to Cart"}
+            title={isOutOfStock ? "Out of stock" : "Add to Cart"}
           >
-            <ShoppingCart size={18} />
+            <ShoppingCart size={17} />
           </button>
         )}
       </div>
