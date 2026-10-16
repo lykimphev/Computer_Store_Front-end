@@ -39,21 +39,26 @@ export interface OrderDetail {
  * Handles checkout, order persistence, invoice fetching, and customer history.
  */
 export const OrderService = {
-  createOrder: async (items: CartItem[], paymentMethod: string = "cash"): Promise<ApiResponse<any>> => {
-    const total = items.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
+  createOrder: async (
+    items: CartItem[],
+    paymentMethod: string = "cash",
+    phone: string = "012 345 678",
+    shippingAddress: string = "Phnom Penh, Cambodia"
+  ): Promise<ApiResponse<any>> => {
+    const total = items.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
     const currentUser = authService.getCurrentUser();
 
     try {
       const payload = {
-        user_id: currentUser?.id && typeof currentUser.id === 'number' ? currentUser.id : undefined,
+        user_id: currentUser?.id && typeof currentUser.id === "number" ? currentUser.id : undefined,
         email: currentUser?.email,
-        items: items.map(item => ({
+        items: items.map((item) => ({
           product_id: item.product.id,
           qty: item.quantity,
         })),
         payment_method: paymentMethod,
-        phone: "012 345 678",
-        shipping_address: "Phnom Penh, Cambodia",
+        phone: phone || "012 345 678",
+        shipping_address: shippingAddress || "Phnom Penh, Cambodia",
       };
 
       const response = await apiClient.post(END_POINT, payload);
@@ -75,6 +80,10 @@ export const OrderService = {
         },
       };
     } catch (error: any) {
+      const backendMessage = error?.response?.data?.message;
+      if (backendMessage) {
+        throw new Error(backendMessage);
+      }
       console.warn("Backend order creation warning, using order fallback:", error);
 
       const fallbackOrder = {
@@ -102,10 +111,10 @@ export const OrderService = {
     try {
       const params: any = {};
       if (userEmail) params.email = userEmail;
-      
+
       const response = await apiClient.get(END_POINT, { params });
       const resData = response.data || response;
-      let orders = Array.isArray(resData.data) ? resData.data : (Array.isArray(resData) ? resData : []);
+      let orders = Array.isArray(resData.data) ? resData.data : Array.isArray(resData) ? resData : [];
 
       // If backend returns empty, check local history fallback
       if (orders.length === 0) {
@@ -141,7 +150,7 @@ export const OrderService = {
         customer_name: currentUser?.fullName || "Valued Customer",
         total_amount: total,
         payment_method: paymentMethod,
-        payment_status: "paid",
+        payment_status: paymentMethod === "cash" ? "pending" : "paid",
         order_status: "processing",
         created_at: order.created_at || new Date().toISOString(),
         items: items.map((it, idx) => ({
@@ -166,7 +175,7 @@ export const OrderService = {
       if (!existing) return [];
       const list: any[] = JSON.parse(existing);
       if (!userEmail) return list;
-      return list.filter(o => !o.email || o.email.toLowerCase() === userEmail.toLowerCase());
+      return list.filter((o) => !o.email || o.email.toLowerCase() === userEmail.toLowerCase());
     } catch {
       return [];
     }

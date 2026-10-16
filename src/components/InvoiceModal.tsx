@@ -18,7 +18,15 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({ order, onClose }) =>
 
   const orderNum = order.order_number || `ORD-KP-${order.id}`;
   const invNum = `INV-${orderNum.replace("ORD-", "")}`;
-  const dateStr = order.created_at ? new Date(order.created_at).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }) : new Date().toLocaleDateString();
+  const dateStr = order.created_at
+    ? new Date(order.created_at).toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+    : new Date().toLocaleDateString();
   const customerName = order.user?.name || order.customer_name || "Valued Customer";
   const customerEmail = order.user?.email || order.email || "customer@gmail.com";
   const customerPhone = order.phone || "012 345 678";
@@ -39,7 +47,6 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({ order, onClose }) =>
     >
       <div className="modal-dialog modal-dialog-centered modal-lg" style={{ maxWidth: "800px" }}>
         <div className="modal-content border-0 rounded-4 shadow-lg overflow-hidden bg-white">
-          
           {/* Header Action Toolbar (Hidden during print) */}
           <div className="d-flex justify-content-between align-items-center p-3 bg-light border-bottom d-print-none">
             <div className="d-flex align-items-center gap-2 text-primary fw-bold">
@@ -54,11 +61,7 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({ order, onClose }) =>
               >
                 <Printer size={16} /> Print / Save PDF
               </button>
-              <button
-                onClick={onClose}
-                className="btn btn-outline-secondary btn-sm rounded-circle p-1.5"
-                title="Close"
-              >
+              <button onClick={onClose} className="btn btn-outline-secondary btn-sm rounded-circle p-1.5" title="Close">
                 <X size={18} />
               </button>
             </div>
@@ -66,22 +69,32 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({ order, onClose }) =>
 
           {/* Printable Invoice Container */}
           <div className="p-4 p-md-5 bg-white text-dark" id="printable-invoice">
-            
             {/* Store Branding Header */}
             <div className="d-flex justify-content-between align-items-start border-bottom pb-4 mb-4 flex-wrap gap-3">
               <div className="d-flex align-items-center gap-3">
-                <div className="rounded-circle bg-white border p-1 d-flex align-items-center justify-content-center shadow-sm" style={{ width: "65px", height: "65px" }}>
-                  <img src="/Image/Logo.png" alt="Logo" style={{ width: "100%", height: "100%", borderRadius: "50%", objectFit: "cover" }} />
+                <div
+                  className="rounded-circle bg-white border p-1 d-flex align-items-center justify-content-center shadow-sm"
+                  style={{ width: "65px", height: "65px" }}
+                >
+                  <img
+                    src="/Image/Logo.png"
+                    alt="Logo"
+                    style={{ width: "100%", height: "100%", borderRadius: "50%", objectFit: "cover" }}
+                  />
                 </div>
                 <div>
-                  <h3 className="fw-extrabold mb-1 text-primary" style={{ color: "#1877F2" }}>KP COMPUTER STORE</h3>
+                  <h3 className="fw-extrabold mb-1 text-primary" style={{ color: "#1877F2" }}>
+                    KP COMPUTER STORE
+                  </h3>
                   <p className="small text-muted mb-0">Premium Computers, Laptops & Custom PC Hardware</p>
                   <p className="small text-secondary mb-0">Street 271, Phnom Penh, Cambodia | Tel: +855 12 345 678</p>
                 </div>
               </div>
 
               <div className="text-md-end">
-                <span className="badge bg-primary px-3 py-2 fs-6 rounded-pill fw-bold text-uppercase mb-2">INVOICE</span>
+                <span className="badge bg-primary px-3 py-2 fs-6 rounded-pill fw-bold text-uppercase mb-2">
+                  INVOICE
+                </span>
                 <div className="fw-bold font-monospace fs-6 text-dark">{invNum}</div>
                 <div className="small text-muted">Order: {orderNum}</div>
                 <div className="small text-muted">Date: {dateStr}</div>
@@ -128,17 +141,28 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({ order, onClose }) =>
               <table className="table table-bordered align-middle">
                 <thead className="table-light">
                   <tr>
-                    <th style={{ width: "5%" }} className="text-center">#</th>
-                    <th style={{ width: "55%" }}>Product Description</th>
-                    <th style={{ width: "15%" }} className="text-center">Price</th>
-                    <th style={{ width: "10%" }} className="text-center">Qty</th>
-                    <th style={{ width: "15%" }} className="text-end">Total</th>
+                    <th style={{ width: "5%" }} className="text-center">
+                      #
+                    </th>
+                    <th style={{ width: "40%" }}>Product Description</th>
+                    <th style={{ width: "20%" }} className="text-center">
+                      Warranty
+                    </th>
+                    <th style={{ width: "13%" }} className="text-center">
+                      Price
+                    </th>
+                    <th style={{ width: "7%" }} className="text-center">
+                      Qty
+                    </th>
+                    <th style={{ width: "15%" }} className="text-end">
+                      Total
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
                   {items.length === 0 ? (
                     <tr>
-                      <td colSpan={5} className="text-center py-4 text-muted">
+                      <td colSpan={6} className="text-center py-4 text-muted">
                         No product item details recorded for this invoice.
                       </td>
                     </tr>
@@ -148,6 +172,18 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({ order, onClose }) =>
                       const prodPrice = Number(it.price || 0);
                       const prodQty = Number(it.qty || 1);
                       const prodSub = Number(it.subtotal || prodPrice * prodQty);
+
+                      const orderDate = order?.created_at ? new Date(order.created_at) : new Date();
+                      const isLaptop = (it.product?.category || "").toLowerCase() === "laptop";
+                      const warrantyYears = isLaptop ? 2 : 1;
+                      const expiryDate = new Date(orderDate);
+                      expiryDate.setFullYear(expiryDate.getFullYear() + warrantyYears);
+
+                      const expiryStr = expiryDate.toLocaleDateString("en-US", {
+                        year: "numeric",
+                        month: "short",
+                        day: "numeric",
+                      });
 
                       return (
                         <tr key={index}>
@@ -169,6 +205,16 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({ order, onClose }) =>
                               </div>
                             </div>
                           </td>
+                          {/* 👇 បង្ហាញ Warranty Status & Expiry Date */}
+                          <td className="text-center">
+                            <span className="badge bg-success-subtle text-success border border-success-subtle px-2.5 py-1 rounded-pill small fw-bold">
+                              🛡️ {warrantyYears} {warrantyYears > 1 ? "Years" : "Year"}
+                            </span>
+                            <div className="small text-muted mt-1" style={{ fontSize: "11px" }}>
+                              Valid until {expiryStr}
+                            </div>
+                          </td>
+
                           <td className="text-center fw-semibold">${prodPrice.toFixed(2)}</td>
                           <td className="text-center fw-bold">{prodQty}</td>
                           <td className="text-end fw-bold text-dark">${prodSub.toFixed(2)}</td>
@@ -179,9 +225,10 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({ order, onClose }) =>
                 </tbody>
                 <tfoot>
                   <tr>
-                    <td colSpan={3} rowSpan={3} className="p-3 bg-light align-top">
+                    <td colSpan={4} rowSpan={3} className="p-3 bg-light align-top">
                       <div className="small text-muted">
-                        <strong className="text-dark">Warranty & Terms:</strong> All laptops and PC hardware carry a 1-year official store warranty. For support, contact KP Computer Store.
+                        <strong className="text-dark">Warranty & Terms:</strong> All laptops and PC hardware carry a
+                        1-year official store warranty. For support, contact KP Computer Store.
                       </div>
                     </td>
                     <td className="text-end fw-semibold small">Subtotal:</td>
@@ -192,8 +239,12 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({ order, onClose }) =>
                     <td className="text-end fw-semibold">$0.00</td>
                   </tr>
                   <tr className="table-primary">
-                    <td className="text-end fw-extrabold fs-6 text-primary" style={{ color: "#1877F2" }}>Grand Total:</td>
-                    <td className="text-end fw-extrabold fs-5 text-primary" style={{ color: "#1877F2" }}>${totalAmt.toFixed(2)}</td>
+                    <td className="text-end fw-extrabold fs-6 text-primary" style={{ color: "#1877F2" }}>
+                      Grand Total:
+                    </td>
+                    <td className="text-end fw-extrabold fs-5 text-primary" style={{ color: "#1877F2" }}>
+                      ${totalAmt.toFixed(2)}
+                    </td>
                   </tr>
                 </tfoot>
               </table>
@@ -208,16 +259,19 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({ order, onClose }) =>
                   style={{ width: "80px", height: "80px" }}
                   className="rounded border p-1"
                 />
-                <div className="small text-muted mt-1 font-monospace" style={{ fontSize: "11px" }}>Scan to verify invoice</div>
+                <div className="small text-muted mt-1 font-monospace" style={{ fontSize: "11px" }}>
+                  Scan to verify invoice
+                </div>
               </div>
 
               <div className="text-center" style={{ minWidth: "180px" }}>
                 <div className="border-bottom pb-4 mb-1" style={{ width: "160px" }}></div>
                 <div className="small fw-bold text-dark">Authorized Signature</div>
-                <div className="small text-muted" style={{ fontSize: "11px" }}>KP Computer Store</div>
+                <div className="small text-muted" style={{ fontSize: "11px" }}>
+                  KP Computer Store
+                </div>
               </div>
             </div>
-
           </div>
 
           {/* Modal Footer (Hidden during print) */}
@@ -233,7 +287,6 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({ order, onClose }) =>
               <Printer size={16} /> Print Invoice
             </button>
           </div>
-
         </div>
       </div>
     </div>

@@ -99,6 +99,10 @@ export const LoginPage: React.FC<LoginPageProps> = ({
       navigate('/');
     } catch (err: any) {
       const backendData = err?.response?.data;
+      if (err?.response?.status === 403) {
+        setErrorMsg(backendData?.message || 'Your account has been deactivated. Please contact support or management.');
+        return;
+      }
       const newAttempts = failedAttempts + 1;
       setFailedAttempts(newAttempts);
       localStorage.setItem(STORAGE_KEY_ATTEMPTS, String(newAttempts));

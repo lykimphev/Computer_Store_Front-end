@@ -5,6 +5,7 @@ import { ShoppingCart, LogOut, User as UserIcon } from "lucide-react";
 import { authService } from "../services/authService";
 import { cartService } from "../services/cartService";
 import { Footer } from "../components/Footer";
+import { CustomerSupportWidget } from "../components/CustomerSupportWidget";
 import type { User } from "../model";
 
 /**
@@ -70,7 +71,10 @@ export default function MainLayout() {
 
             {/* Right User Actions */}
             <div className="d-flex align-items-center gap-3">
-              <NavLink to="/cart" className="position-relative text-white me-2 text-decoration-none">
+              {/* Customer Support & Hotline Button */}
+              <CustomerSupportWidget />
+
+              <NavLink to="/cart" className="position-relative text-white me-2 text-decoration-none" title="Shopping Cart">
                 <ShoppingCart size={24} />
                 {cartCount > 0 && (
                   <span className="position-absolute top-0 start-100 translate-middle badge rounded-circle bg-danger" style={{ fontSize: "10px" }}>

@@ -1,6 +1,7 @@
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { CheckCircle2, ArrowRight, Package, Truck, ShieldCheck, Home } from 'lucide-react';
+import { CheckCircle2, ArrowRight, Package, ShieldCheck, Home } from 'lucide-react';
+import { OrderTimeline } from '../components/OrderTimeline';
 
 export const OrderSuccessPage: React.FC = () => {
   const navigate = useNavigate();
@@ -14,7 +15,7 @@ export const OrderSuccessPage: React.FC = () => {
   return (
     <div className="container py-5">
       <div className="row justify-content-center">
-        <div className="col-12 col-md-8 col-lg-6">
+        <div className="col-12 col-md-8 col-lg-7">
           <div className="card border-0 shadow-sm rounded-4 text-center p-4 p-md-5 bg-white">
             
             {/* Animated / Styled Success Icon Badge */}
@@ -30,6 +31,14 @@ export const OrderSuccessPage: React.FC = () => {
             <p className="text-secondary mb-4" style={{ fontSize: '15px' }}>
               Your order has been placed and confirmed. Our team is packing your items for delivery.
             </p>
+
+            {/* 5-Step Order Progress Timeline */}
+            <div className="card border rounded-4 p-3 mb-4 bg-light bg-opacity-50 text-start shadow-xs">
+              <div className="small fw-bold text-secondary text-uppercase mb-1">
+                📦 Live Order Progress
+              </div>
+              <OrderTimeline status="processing" />
+            </div>
 
             {/* Order Details Receipt Box */}
             <div className="bg-light rounded-4 p-4 text-start mb-4 border">
@@ -53,12 +62,12 @@ export const OrderSuccessPage: React.FC = () => {
                 <span className="badge bg-success text-white rounded-pill px-3 py-1 fw-bold">Processing</span>
               </div>
 
-              <div className="d-flex justify-content-between align-items-center pt-2 border-top mt-3">
+              {/* <div className="d-flex justify-content-between align-items-center pt-2 border-top mt-3">
                 <span className="text-muted small d-flex align-items-center gap-1">
                   <Truck size={16} className="text-primary" /> Estimated Delivery:
                 </span>
                 <span className="fw-bold text-dark small">1 - 2 Working Days (Phnom Penh)</span>
-              </div>
+              </div> */}
             </div>
 
             {/* Action Buttons */}

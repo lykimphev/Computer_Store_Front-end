@@ -19,10 +19,12 @@ import {
   X,
   Trash2,
   AlertTriangle,
+  Truck,
 } from "lucide-react";
 import type { User } from "../model";
 import { authService } from "../services/authService";
 import { orderService } from "../services/orderService";
+import { OrderTimeline } from "../components/OrderTimeline";
 import { formatImageUrl } from "../services/productService";
 import { InvoiceModal } from "../components/InvoiceModal";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -628,6 +630,8 @@ export const ProfilePage: React.FC = () => {
                           year: "numeric",
                           month: "short",
                           day: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
                         })
                       : "Recently";
 
@@ -685,7 +689,12 @@ export const ProfilePage: React.FC = () => {
                                       />
                                       <div>
                                         <div className="fw-bold text-dark small">{prodName}</div>
-                                        <span className="text-muted small">Qty: {prodQty} &times; ${prodPrice.toFixed(2)}</span>
+                                        <div className="d-flex align-items-center gap-2 mt-0.5">
+                                          <span className="text-muted small">Qty: {prodQty} &times; ${prodPrice.toFixed(2)}</span>
+                                          <span className="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-0.5 rounded-pill" style={{ fontSize: "10px" }}>
+                                            🛡️ {(it.product?.category || "").toLowerCase() === "laptop" ? "2 Yrs Warranty" : "1 Yr Warranty"}
+                                          </span>
+                                        </div>
                                       </div>
                                     </div>
                                     <div className="fw-bold text-dark">
@@ -695,6 +704,19 @@ export const ProfilePage: React.FC = () => {
                                 );
                               })
                             )}
+                          </div>
+
+                          {/* Live Order Timeline Progress Tracker */}
+                          <div className="bg-light rounded-4 p-3 mb-3 border">
+                            <div className="d-flex justify-content-between align-items-center mb-1">
+                              <span className="small fw-bold text-dark d-flex align-items-center gap-1">
+                                <Truck size={15} className="text-primary" /> Delivery Progress
+                              </span>
+                              <span className="small text-muted font-monospace text-capitalize">
+                                Status: {order.order_status || "Processing"}
+                              </span>
+                            </div>
+                            <OrderTimeline status={order.order_status || "processing"} />
                           </div>
 
                           {/* Footer Action Details */}

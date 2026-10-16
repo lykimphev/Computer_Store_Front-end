@@ -61,4 +61,6 @@ export interface Product {
   image: string;
   isFeatured?: boolean;
   stock?: number;
+  warranty?: string;
+  description?: string;
 }

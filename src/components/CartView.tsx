@@ -19,16 +19,13 @@ export const CartView: React.FC<CartViewProps> = ({
   onBack,
   onProceedOrder,
 }) => {
-  const totalUSD = cart.reduce(
-    (sum, item) => sum + item.product.price * item.quantity,
-    0
-  );
+  const totalUSD = cart.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
 
   const isEmpty = cart.length === 0;
 
   return (
-    <div className="min-vh-100 bg-white d-flex flex-column justify-content-between">
-      <div>
+    <div className="min-vh-100 bg-white d-flex flex-column">
+      <div className="flex-grow-1">
         <div className="container-fluid px-4 px-lg-5 pt-4 pb-2">
           <button
             className="btn border-0 d-inline-flex align-items-center gap-3 text-dark p-0"
@@ -53,11 +50,10 @@ export const CartView: React.FC<CartViewProps> = ({
               <div className="mb-3 text-primary">
                 <ShoppingBag size={72} color="#1877F2" strokeWidth={1.5} />
               </div>
-              <h3 className="fw-bold text-dark mb-2">
-                No items in your cart
-              </h3>
+              <h3 className="fw-bold text-dark mb-2">No items in your cart</h3>
               <p className="text-muted mb-4" style={{ maxWidth: "420px" }}>
-                Your shopping cart is currently empty. Explore our store for the latest laptops, PC hardware, and accessories!
+                Your shopping cart is currently empty. Explore our store for the latest laptops, PC hardware, and
+                accessories!
               </p>
               <button
                 className="btn btn-primary rounded-pill px-4 py-2.5 fs-6 fw-bold shadow-sm d-inline-flex align-items-center gap-2"
@@ -104,6 +100,7 @@ export const CartView: React.FC<CartViewProps> = ({
                         <button
                           className="btn btn-outline-secondary rounded-end-3"
                           onClick={() => onUpdateQuantity(item.product.id, item.quantity + 1)}
+                          disabled={item.product.stock !== undefined && item.quantity >= item.product.stock}
                         >
                           <Plus size={14} />
                         </button>
