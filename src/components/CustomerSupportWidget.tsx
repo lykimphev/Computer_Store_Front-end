@@ -22,10 +22,11 @@ export const CustomerSupportWidget: React.FC = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
   // Store Telegram and Hotline details
-  const telegramUsername = "@computerstore_kp_bot"; // Change to your Telegram username
+  const telegramHandle = "computerstore_kp_bot";
+  const telegramUsername = telegramHandle.replace(/^@/, "");
   const telegramUrl = `https://t.me/${telegramUsername}`;
   const hotlinePhone = "+855 963 012 012 / 68 616 858";
-  const hotlineTel = "tel:+855 963 012 012";
+  const hotlineTel = "tel:+855963012012";
 
   return (
     <div className="position-relative d-inline-block">
