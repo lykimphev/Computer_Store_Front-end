@@ -197,9 +197,9 @@ export const HomePage: React.FC<HomePageProps> = ({
   };
 
   const renderProductGrid = (items: Product[]) => (
-    <div className="row g-4">
+    <div className="row g-4 mobile-carousel-row">
       {items.map((product) => (
-        <div key={product.id} className="col-12 col-md-6 col-lg-4">
+        <div key={product.id} className="col-12 col-md-6 col-lg-4 mobile-carousel-col">
           <ProductCard product={product} onViewDetail={handleOpenDetail} onAddToCart={(p) => handleAddToCart(p, 1)} />
         </div>
       ))}
@@ -208,6 +208,31 @@ export const HomePage: React.FC<HomePageProps> = ({
 
   return (
     <>
+      <style>{`
+        @media (max-width: 767.98px) {
+          .mobile-carousel-row {
+            display: flex !important;
+            flex-wrap: nowrap !important;
+            overflow-x: auto !important;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+            padding-bottom: 1rem;
+            margin-left: -0.75rem !important;
+            margin-right: -0.75rem !important;
+            padding-left: 1rem;
+            padding-right: 1rem;
+          }
+          .mobile-carousel-row::-webkit-scrollbar {
+            display: none;
+          }
+          .mobile-carousel-col {
+            flex: 0 0 84% !important;
+            max-width: 84% !important;
+            scroll-snap-align: center;
+          }
+        }
+      `}</style>
+
       {/* Toast Notification Alert */}
       {toastMessage && (
         <div
@@ -243,11 +268,27 @@ export const HomePage: React.FC<HomePageProps> = ({
         </h2>
 
         {loading ? (
-          <div className="text-center py-5">
-            <div className="spinner-border text-primary" role="status">
-              <span className="visually-hidden">Loading products...</span>
+          <div>
+            <div className="text-center mb-4">
+              <div className="spinner-border text-primary spinner-border-sm me-2" role="status"></div>
+              <span className="small text-muted fw-semibold">Loading live products from database...</span>
             </div>
-            <p className="mt-3 text-muted">Loading live products from database...</p>
+            <div className="row g-4 mobile-carousel-row">
+              {[1, 2, 3, 4, 5, 6].map((n) => (
+                <div key={n} className="col-12 col-md-6 col-lg-4 mobile-carousel-col">
+                  <div className="card h-100 border rounded-4 shadow-sm p-3 bg-white placeholder-glow" style={{ minHeight: "360px" }}>
+                    <div className="placeholder bg-light rounded-4 w-100 mb-3" style={{ height: "180px" }}></div>
+                    <div className="placeholder bg-secondary bg-opacity-25 col-8 mx-auto py-2 mb-2 rounded-pill d-block"></div>
+                    <div className="placeholder bg-danger bg-opacity-25 col-4 mx-auto py-2 mb-3 rounded-pill d-block"></div>
+                    <div className="placeholder bg-light col-6 mx-auto py-2 mb-2 rounded-pill d-block"></div>
+                    <div className="mt-auto d-flex gap-2 pt-3">
+                      <div className="placeholder bg-light col-8 py-3 rounded-3"></div>
+                      <div className="placeholder bg-primary bg-opacity-25 col-4 py-3 rounded-3"></div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         ) : displayedProducts.length === 0 ? (
           <div className="text-center py-5 text-muted">

@@ -132,73 +132,68 @@ export const Hero: React.FC<HeroProps> = ({
       </div>
 
       {/* Main Categories Navigation */}
-      <div className="border-bottom py-3">
+      <div className="border-bottom py-2.5 bg-white">
         <div className="w-100 px-3 px-md-4">
-          <div className="row text-center g-3">
-            <div className="col-4">
-              <button
-                type="button"
-                className={`btn w-100 category-tab-btn fw-bold d-flex align-items-center justify-content-center gap-2 ${
-                  activeTab === 'laptop' ? 'active' : 'text-dark'
-                }`}
-                onClick={() => onTabChange('laptop')}
-                style={{ fontSize: '16px', letterSpacing: '0.5px', cursor: 'pointer' }}
-              >
-                <Laptop size={20} />
-                LAPTOP
-              </button>
-            </div>
-            <div className="col-4">
-              <button
-                type="button"
-                className={`btn w-100 category-tab-btn fw-bold d-flex align-items-center justify-content-center gap-2 ${
-                  activeTab === 'pc_hardware' ? 'active' : 'text-dark'
-                }`}
-                onClick={() => onTabChange('pc_hardware')}
-                style={{ fontSize: '16px', letterSpacing: '0.5px', cursor: 'pointer' }}
-              >
-                <Cpu size={20} />
-                PC HARDWARE
-              </button>
-            </div>
-            <div className="col-4">
-              <button
-                type="button"
-                className={`btn w-100 category-tab-btn fw-bold d-flex align-items-center justify-content-center gap-2 ${
-                  activeTab === 'accessories' ? 'active' : 'text-dark'
-                }`}
-                onClick={() => onTabChange('accessories')}
-                style={{ fontSize: '16px', letterSpacing: '0.5px', cursor: 'pointer' }}
-              >
-                <HardDrive size={20} />
-                ACCESSORIES
-              </button>
-            </div>
+          <div className="d-flex flex-nowrap overflow-x-auto gap-2 gap-md-3 py-1 justify-content-start justify-content-md-center align-items-center" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+            <button
+              type="button"
+              className={`btn category-tab-btn fw-bold d-flex align-items-center justify-content-center gap-2 text-nowrap px-3 px-md-4 py-2 rounded-pill flex-shrink-0 ${
+                activeTab === 'laptop' ? 'active shadow-sm' : 'text-dark border-0 bg-light'
+              }`}
+              onClick={() => onTabChange('laptop')}
+              style={{ fontSize: '15px', letterSpacing: '0.3px', cursor: 'pointer' }}
+            >
+              <Laptop size={18} />
+              LAPTOPS
+            </button>
+            <button
+              type="button"
+              className={`btn category-tab-btn fw-bold d-flex align-items-center justify-content-center gap-2 text-nowrap px-3 px-md-4 py-2 rounded-pill flex-shrink-0 ${
+                activeTab === 'pc_hardware' ? 'active shadow-sm' : 'text-dark border-0 bg-light'
+              }`}
+              onClick={() => onTabChange('pc_hardware')}
+              style={{ fontSize: '15px', letterSpacing: '0.3px', cursor: 'pointer' }}
+            >
+              <Cpu size={18} />
+              PC HARDWARE
+            </button>
+            <button
+              type="button"
+              className={`btn category-tab-btn fw-bold d-flex align-items-center justify-content-center gap-2 text-nowrap px-3 px-md-4 py-2 rounded-pill flex-shrink-0 ${
+                activeTab === 'accessories' ? 'active shadow-sm' : 'text-dark border-0 bg-light'
+              }`}
+              onClick={() => onTabChange('accessories')}
+              style={{ fontSize: '15px', letterSpacing: '0.3px', cursor: 'pointer' }}
+            >
+              <HardDrive size={18} />
+              ACCESSORIES
+            </button>
           </div>
         </div>
       </div>
 
-      {/* Subcategories / Component Filter Pills */}
-      <div className="border-bottom bg-white py-3">
+      {/* Subcategories / Component Filter Pills (Swipeable on mobile like Apple/YouTube) */}
+      <div className="border-bottom bg-white py-2">
         <div className="w-100 px-3 px-md-4">
-          <div className="d-flex flex-wrap justify-content-center align-items-center gap-2 gap-md-3 py-1">
+          <div className="d-flex flex-nowrap overflow-x-auto gap-2 py-1 justify-content-start justify-content-md-center align-items-center" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch' }}>
             {filterOptions.map((opt) => {
               const isSelected = activeBrand === opt.key;
               return (
                 <button
                   type="button"
                   key={opt.key}
-                  className={`btn px-4 py-2 rounded-pill fw-bold text-nowrap transition-all ${
+                  className={`btn px-3 py-1.5 rounded-pill fw-semibold text-nowrap flex-shrink-0 transition-all ${
                     isSelected
                       ? 'btn-primary text-white shadow-sm'
-                      : 'btn-outline-light text-dark border-0 hover-bg-light'
+                      : 'btn-light text-dark border-0'
                   }`}
                   onClick={() => onBrandChange(opt.key)}
                   style={{
-                    backgroundColor: isSelected ? '#1877F2' : 'transparent',
-                    fontSize: '14px',
+                    backgroundColor: isSelected ? '#1877F2' : '#f8f9fa',
+                    fontSize: '13px',
                     borderRadius: '50rem',
                     cursor: 'pointer',
+                    whiteSpace: 'nowrap'
                   }}
                 >
                   {opt.label}
