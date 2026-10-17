@@ -457,15 +457,15 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({ product,
 
           {/* Body */}
           <div className="modal-body p-4">
-            <div className="row align-items-center g-4">
+            <div className="row align-items-start g-4">
               {/* Product Image */}
               <div className="col-md-6 text-center">
-                <div className="p-3 bg-light rounded-4 border">
+                <div className="p-3 bg-light rounded-4 border sticky-top" style={{ top: "1rem" }}>
                   <img
                     src={product.image}
                     alt={product.name}
                     className="img-fluid rounded-3"
-                    style={{ maxHeight: "280px", objectFit: "contain" }}
+                    style={{ maxHeight: "320px", width: "100%", objectFit: "contain" }}
                     onError={(e) => {
                       (e.currentTarget as HTMLImageElement).src = "/Image/Logo.png";
                     }}
