@@ -712,9 +712,15 @@ export const ProfilePage: React.FC = () => {
                               <span className="small fw-bold text-dark d-flex align-items-center gap-1">
                                 <Truck size={15} className="text-primary" /> Delivery Progress
                               </span>
-                              <span className="small text-muted font-monospace text-capitalize">
-                                Status: {order.order_status || "Processing"}
-                              </span>
+                              {order.order_status === "completed" || order.order_status === "delivered" ? (
+                                <span className="badge bg-success-subtle text-success border border-success-subtle px-2.5 py-1 rounded-pill small fw-bold d-flex align-items-center gap-1">
+                                  <Check size={13} /> Delivered (Completed)
+                                </span>
+                              ) : (
+                                <span className="small text-muted font-monospace text-capitalize">
+                                  Status: {order.order_status || "Processing"}
+                                </span>
+                              )}
                             </div>
                             <OrderTimeline status={order.order_status || "processing"} />
                           </div>

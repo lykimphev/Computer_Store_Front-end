@@ -28,13 +28,14 @@ export const OrderTimeline: React.FC<OrderTimelineProps> = ({ status }) => {
   };
 
   const currentStep = getActiveStep();
+  const isAllDelivered = normStatus === "delivered" || normStatus === "completed";
 
   const steps = [
     { id: 1, title: "Order Placed", desc: "Order submitted", icon: Clock },
     { id: 2, title: "Confirmed", desc: "Payment verified", icon: ShieldCheck },
     { id: 3, title: "Processing", desc: "Packing products", icon: Package },
     { id: 4, title: "Shipping", desc: "Out for delivery", icon: Truck },
-    { id: 5, title: "Delivered", desc: "Package received", icon: Gift },
+    { id: 5, title: "Delivered", desc: isAllDelivered ? "Package received (Done)" : "Package received", icon: Gift },
   ];
 
   return (
@@ -49,7 +50,7 @@ export const OrderTimeline: React.FC<OrderTimelineProps> = ({ status }) => {
 
         {/* Active Progress Colored Line */}
         <div
-          className="position-absolute top-50 start-0 translate-middle-y bg-primary transition"
+          className={`position-absolute top-50 start-0 translate-middle-y transition ${isAllDelivered ? "bg-success" : "bg-primary"}`}
           style={{
             height: "4px",
             zIndex: 1,
@@ -61,15 +62,18 @@ export const OrderTimeline: React.FC<OrderTimelineProps> = ({ status }) => {
         {/* Step Nodes */}
         <div className="d-flex justify-content-between position-relative" style={{ zIndex: 2 }}>
           {steps.map((st) => {
-            const isCompleted = currentStep > st.id;
-            const isCurrent = currentStep === st.id;
+            const isCompleted = isAllDelivered ? true : currentStep > st.id;
+            const isCurrent = !isAllDelivered && currentStep === st.id;
+            const isFinalDone = isAllDelivered && st.id === 5;
             const IconComponent = st.icon;
 
             return (
               <div key={st.id} className="text-center" style={{ width: "110px" }}>
                 <div
                   className={`rounded-circle mx-auto d-flex align-items-center justify-content-center shadow-sm transition ${
-                    isCompleted
+                    isFinalDone
+                      ? "bg-success text-white border border-2 border-success"
+                      : isCompleted
                       ? "bg-primary text-white border border-2 border-primary"
                       : isCurrent
                       ? "bg-white text-primary border border-3 border-primary"
@@ -81,7 +85,7 @@ export const OrderTimeline: React.FC<OrderTimelineProps> = ({ status }) => {
                 </div>
 
                 <div className="mt-2">
-                  <div className={`small fw-bold ${isCurrent ? "text-primary" : isCompleted ? "text-dark" : "text-muted"}`}>
+                  <div className={`small fw-bold ${isFinalDone ? "text-success" : isCurrent ? "text-primary" : isCompleted ? "text-dark" : "text-muted"}`}>
                     {st.title}
                   </div>
                   <div className="text-muted" style={{ fontSize: "11px" }}>
@@ -97,15 +101,18 @@ export const OrderTimeline: React.FC<OrderTimelineProps> = ({ status }) => {
       {/* Mobile Vertical Timeline */}
       <div className="d-md-none vstack gap-3 my-2">
         {steps.map((st) => {
-          const isCompleted = currentStep > st.id;
-          const isCurrent = currentStep === st.id;
+          const isCompleted = isAllDelivered ? true : currentStep > st.id;
+          const isCurrent = !isAllDelivered && currentStep === st.id;
+          const isFinalDone = isAllDelivered && st.id === 5;
           const IconComponent = st.icon;
 
           return (
             <div key={st.id} className="d-flex align-items-center gap-3">
               <div
                 className={`rounded-circle d-flex align-items-center justify-content-center flex-shrink-0 shadow-xs ${
-                  isCompleted
+                  isFinalDone
+                    ? "bg-success text-white"
+                    : isCompleted
                     ? "bg-primary text-white"
                     : isCurrent
                     ? "bg-white text-primary border border-2 border-primary"
@@ -116,18 +123,22 @@ export const OrderTimeline: React.FC<OrderTimelineProps> = ({ status }) => {
                 {isCompleted ? <Check size={18} /> : <IconComponent size={18} />}
               </div>
               <div className="flex-grow-1">
-                <div className={`fw-bold small ${isCurrent ? "text-primary" : isCompleted ? "text-dark" : "text-muted"}`}>
+                <div className={`fw-bold small ${isFinalDone ? "text-success" : isCurrent ? "text-primary" : isCompleted ? "text-dark" : "text-muted"}`}>
                   {st.title}
                 </div>
                 <div className="text-muted" style={{ fontSize: "11px" }}>
                   {st.desc}
                 </div>
               </div>
-              {isCurrent && (
+              {isFinalDone ? (
+                <span className="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2 py-1 small fw-bold">
+                  Received
+                </span>
+              ) : isCurrent ? (
                 <span className="badge bg-primary-subtle text-primary rounded-pill px-2 py-1 small">
                   In Progress
                 </span>
-              )}
+              ) : null}
             </div>
           );
         })}
