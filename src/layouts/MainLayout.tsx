@@ -41,7 +41,7 @@ export default function MainLayout() {
     <div className="bg-light min-vh-100 w-100 d-flex flex-column justify-content-between">
       {/* 1. Navbar (Full Screen Fluid Container) */}
       <Navbar bg="primary" variant="dark" expand="lg" className="shadow-sm py-2 sticky-top" style={{ backgroundColor: "#1877F2" }}>
-        <Container fluid className="px-4">
+        <Container fluid className="px-4 position-relative">
           <Navbar.Brand href="/" className="fw-bold fs-4 me-auto me-lg-4 d-flex align-items-center gap-2">
             <div className="rounded-circle bg-white p-1 d-flex align-items-center justify-content-center flex-shrink-0" style={{ width: "34px", height: "34px" }}>
               <img src="/Image/Logo.png" alt="Logo" style={{ width: "100%", height: "100%", borderRadius: "50%", objectFit: "cover" }} />
@@ -64,7 +64,7 @@ export default function MainLayout() {
           </div>
 
           <Navbar.Collapse id="main-navbar-nav">
-            <Nav className="mx-auto gap-3 py-2 py-lg-0">
+            <Nav className="navbar-center-nav gap-3 py-2 py-lg-0">
               <NavLink
                 to="/"
                 className={({ isActive }) =>
@@ -84,7 +84,7 @@ export default function MainLayout() {
             </Nav>
 
             {/* Right User Actions (Desktop View) */}
-            <div className="d-none d-lg-flex align-items-center gap-3">
+            <div className="d-none d-lg-flex align-items-center gap-3 ms-auto">
               <CustomerSupportWidget />
 
               <NavLink to="/cart" className="position-relative text-white me-2 text-decoration-none" title="Shopping Cart">
